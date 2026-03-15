@@ -78,10 +78,10 @@ export default function CommunityPage() {
     }
   }
 
-  const CATEGORY_COLORS: Record<string, string> = {
-    study_tips: 'bg-blue-100 text-blue-600',
-    word_debate: 'bg-yellow-100 text-yellow-700',
-    general: 'bg-purple-100 text-purple-600',
+  const CATEGORY_COLORS: Record<string, { background: string; color: string }> = {
+    study_tips: { background: '#a9def9', color: '#1a1a1a' },
+    word_debate: { background: '#fcf6bd', color: '#1a1a1a' },
+    general: { background: '#e4c1f9', color: '#1a1a1a' },
   }
 
   const getCategoryLabel = (cat: string) => CATEGORIES.find(c => c.id === cat)?.label || cat
@@ -106,11 +106,10 @@ export default function CommunityPage() {
             <button
               key={c.id}
               onClick={() => setCategory(c.id)}
-              className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                category === c.id
-                  ? 'bg-pink-500 text-white'
-                  : 'bg-white text-gray-600 border border-pink-200 hover:bg-pink-50'
-              }`}
+              className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+              style={category === c.id
+                ? { background: '#ff99c8', color: '#1a1a1a', border: '2px solid #1a1a1a' }
+                : { background: '#fff', color: '#1a1a1a', border: '2px solid #ff99c8' }}
             >
               <span>{c.emoji}</span>
               <span>{c.label}</span>
@@ -133,11 +132,14 @@ export default function CommunityPage() {
           <div className="space-y-3">
             {posts.map(post => (
               <Link key={post.id} href={`/community/${post.id}`}>
-                <div className="card hover:bg-pink-50 transition-colors cursor-pointer">
+                <div className="card hover:bg-[#fcf6bd] transition-colors cursor-pointer">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                        <span className={`tag text-xs ${CATEGORY_COLORS[post.category] || 'bg-gray-100 text-gray-600'}`}>
+                        <span
+                          className="tag text-xs"
+                          style={CATEGORY_COLORS[post.category] || { background: '#fcf6bd', color: '#1a1a1a' }}
+                        >
                           {getCategoryLabel(post.category)}
                         </span>
                       </div>
@@ -164,7 +166,8 @@ export default function CommunityPage() {
                       <span>💬 {post.commentCount}</span>
                       <button
                         onClick={(e) => handleLike(post.id, e)}
-                        className={`flex items-center gap-1 transition-colors ${post.liked ? 'text-pink-500' : 'text-gray-400 hover:text-pink-400'}`}
+                        className="flex items-center gap-1 transition-colors"
+                        style={{ color: post.liked ? '#ff99c8' : '#aaa' }}
                       >
                         <span>{post.liked ? '❤️' : '🤍'}</span>
                         <span>{post.likeCount}</span>
@@ -195,8 +198,8 @@ export default function CommunityPage() {
                       onClick={() => setNewPost(p => ({ ...p, category: c.id }))}
                       className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                         newPost.category === c.id
-                          ? 'bg-pink-500 text-white'
-                          : 'bg-gray-100 text-gray-600 hover:bg-pink-50'
+                          ? 'bg-[#ff99c8] text-[#1a1a1a]'
+                          : 'bg-[#fcf6bd] text-[#1a1a1a] hover:bg-[#ff99c8]'
                       }`}
                     >
                       {c.emoji} {c.label}

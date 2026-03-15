@@ -1,5 +1,3 @@
-export const runtime = 'edge'
-
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/db'
@@ -7,10 +5,10 @@ import { signToken } from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, username, password } = await req.json()
+    const { email, password } = await req.json()
 
-    if (!email || !username || !password) {
-      return NextResponse.json({ error: '모든 필드를 입력해주세요' }, { status: 400 })
+    if (!email || !password) {
+      return NextResponse.json({ error: '이메일과 비밀번호를 입력해주세요' }, { status: 400 })
     }
 
     if (password.length < 6) {
@@ -18,17 +16,19 @@ export async function POST(req: NextRequest) {
     }
 
     const existing = await prisma.user.findFirst({
-      where: { OR: [{ email }, { username }] },
+      where: { email },
     })
 
     if (existing) {
-      return NextResponse.json({ error: '이미 사용 중인 이메일 또는 사용자명입니다' }, { status: 400 })
+      return NextResponse.json({ error: '이미 사용 중인 이메일입니다' }, { status: 400 })
     }
 
     const hashedPassword = await bcrypt.hash(password, 12)
+    const { randomBytes } = await import('crypto')
+    const tempUsername = `u_${randomBytes(8).toString('hex')}`
 
     const user = await prisma.user.create({
-      data: { email, username, password: hashedPassword },
+      data: { email, username: tempUsername, password: hashedPassword, nicknameSet: false },
     })
 
     // Create initial vocab level entry

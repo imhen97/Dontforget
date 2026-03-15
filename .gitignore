@@ -37,3 +37,7 @@ next-env.d.ts
 # prisma
 prisma/*.db
 prisma/*.db-journal
+
+# local artifacts
+/dontforget@0.1.0
+/next

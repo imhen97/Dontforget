@@ -1,24 +1,27 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
   username     String   @unique
-  password     String
+  nicknameSet  Boolean  @default(true)  // false면 가입 후 별명 미설정
+  password     String?
   dailyGoal    Int      @default(5)
   streak       Int      @default(0)
   lastStudyDay String?  // ISO date string YYYY-MM-DD
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  nyang        Int      @default(30)  // 냥 (currency), start with 30냥
+  equippedItems String  @default("{}") // JSON: {"hat":"hat_crown","accessory":"acc_glasses"}
+  customTopics  String  @default("[]") // JSON: 사용자 추가 카테고리 이름 배열
 
   words        Word[]
   quizSessions QuizSession[]
@@ -27,6 +30,19 @@ model User {
   comments     Comment[]
   postLikes    PostLike[]
   vocabLevel   VocabLevel?
+  catItems     UserCatItem[]
+  reviewNotes  ReviewNote[]
+}
+
+model UserCatItem {
+  id        String   @id @default(cuid())
+  userId    String
+  itemId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemId])
 }
 
 model Word {
@@ -36,9 +52,14 @@ model Word {
   translation String
   exampleEn   String
   exampleKo   String?
+  type        String   @default("word") // "word" | "phrase" | "idiom"
   topic       String?  @default("General")
   mastered    Boolean  @default(false)
   difficulty  Int      @default(3) // 1-6 scale (A1 to C2)
+  phonetic    String?
+  partOfSpeech String?
+  examples    String?  // JSON array of {exampleEn, exampleKo}
+  meanings    String?  // JSON array of meanings
 
   // SM-2 Spaced Repetition fields
   easeFactor  Float    @default(2.5)
@@ -125,4 +146,16 @@ model PostLike {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([postId, userId])
+}
+
+model ReviewNote {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  content   String
+  summary   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

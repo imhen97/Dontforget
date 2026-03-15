@@ -22,12 +22,12 @@ interface StatsData {
 }
 
 const LEVEL_COLORS: Record<string, string> = {
-  Beginner: '#34D399',
-  Elementary: '#60A5FA',
-  Intermediate: '#FBBF24',
-  'Upper-Intermediate': '#F97316',
-  Advanced: '#F87171',
-  Proficient: '#A78BFA',
+  Beginner: '#d0f4de',
+  Elementary: '#a9def9',
+  Intermediate: '#fcf6bd',
+  'Upper-Intermediate': '#ff99c8',
+  Advanced: '#e4c1f9',
+  Proficient: '#ff99c8',
 }
 
 const LEVEL_KOREAN: Record<string, string> = {
@@ -39,7 +39,7 @@ const LEVEL_KOREAN: Record<string, string> = {
   Proficient: '원어민급',
 }
 
-const PIE_COLORS = ['#FF6B9D', '#A78BFA', '#34D399', '#FBBF24', '#60A5FA', '#F97316', '#F87171', '#06B6D4']
+const PIE_COLORS = ['#ff99c8', '#a9def9', '#d0f4de', '#fcf6bd', '#e4c1f9', '#ff99c8', '#a9def9', '#d0f4de']
 
 export default function StatsPage() {
   const [stats, setStats] = useState<StatsData | null>(null)
@@ -69,8 +69,8 @@ export default function StatsPage() {
     <div className="min-h-screen pb-24 md:pb-6">
       <Navbar />
       <main className="max-w-2xl mx-auto px-4 py-6">
-        <h1 className="page-title">📊 내 통계</h1>
-        <p className="text-gray-500 text-sm mb-6">학습 현황을 한눈에 확인하세요</p>
+        <h1 className="page-title">📊 통계</h1>
+        <p className="text-gray-500 text-sm mb-6">공부 기록을 확인해보세요.</p>
 
         {/* Vocab Level Card */}
         <div className="card mb-4 overflow-hidden relative">
@@ -78,16 +78,16 @@ export default function StatsPage() {
             🎓
           </div>
           <div className="relative">
-            <div className="text-xs text-gray-500 font-medium mb-1">내 영어 수준</div>
+            <div className="text-xs text-gray-500 font-medium mb-1">영어 실력</div>
             <div className="flex items-baseline gap-2 mb-1">
-              <span className="text-3xl font-bold" style={{ color: levelColor }}>
+              <span className="text-3xl font-bold px-3 py-1 rounded-xl" style={{ background: levelColor, color: '#1a1a1a' }}>
                 {levelKo}
               </span>
               <span className="text-lg text-gray-500">({stats.vocabLevel?.level})</span>
             </div>
             {stats.vocabLevel && stats.vocabLevel.percentile > 0 && (
               <div className="text-sm text-gray-600">
-                상위 <span className="font-bold text-pink-500">{Math.round(100 - stats.vocabLevel.percentile)}%</span> 에 해당합니다
+                상위 <span className="font-bold" style={{ color: '#1a1a1a' }}>{Math.round(100 - stats.vocabLevel.percentile)}%</span>예요!
               </div>
             )}
             <div className="mt-3">
@@ -95,12 +95,13 @@ export default function StatsPage() {
                 <span>입문</span>
                 <span>원어민급</span>
               </div>
-              <div className="w-full bg-gray-100 rounded-full h-2">
+              <div className="w-full rounded-full h-2" style={{ background: '#fcf6bd' }}>
                 <div
                   className="h-2 rounded-full transition-all duration-1000"
                   style={{
                     width: `${((stats.vocabLevel?.score || 1) / 6) * 100}%`,
-                    backgroundColor: levelColor
+                    backgroundColor: levelColor,
+                    border: '1px solid rgba(0,0,0,0.1)',
                   }}
                 />
               </div>
@@ -110,50 +111,50 @@ export default function StatsPage() {
 
         {/* Key metrics */}
         <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="card">
-            <div className="text-2xl font-bold text-pink-500">{stats.totalWords}</div>
-            <div className="text-xs text-gray-500 mt-0.5">전체 단어</div>
-            <div className="text-xs text-gray-400 mt-1">{stats.masteredWords}개 암기 완료 ({masteryPct}%)</div>
-            <div className="w-full bg-pink-100 rounded-full h-1.5 mt-2">
-              <div className="bg-pink-400 h-1.5 rounded-full" style={{ width: `${masteryPct}%` }} />
+          <div className="card" style={{ background: '#a9def9' }}>
+            <div className="text-2xl font-bold" style={{ color: '#1a1a1a' }}>{stats.totalWords}</div>
+            <div className="text-xs mt-0.5" style={{ color: '#1a1a1a' }}>모은 단어</div>
+            <div className="text-xs mt-1" style={{ color: '#1a1a1a', opacity: 0.7 }}>{stats.masteredWords}개 암기 완료 ({masteryPct}%)</div>
+            <div className="w-full rounded-full h-1.5 mt-2" style={{ background: 'rgba(255,255,255,0.4)' }}>
+              <div className="h-1.5 rounded-full" style={{ width: `${masteryPct}%`, background: '#1a1a1a' }} />
             </div>
           </div>
 
-          <div className="card">
-            <div className="text-2xl font-bold text-orange-500">{stats.streak}</div>
-            <div className="text-xs text-gray-500 mt-0.5">🔥 연속 학습일</div>
-            <div className="text-xs text-gray-400 mt-1">정답률 {stats.accuracy}%</div>
+          <div className="card" style={{ background: '#ff99c8' }}>
+            <div className="text-2xl font-bold" style={{ color: '#1a1a1a' }}>{stats.streak}</div>
+            <div className="text-xs mt-0.5" style={{ color: '#1a1a1a' }}>🔥 연속 출석</div>
+            <div className="text-xs mt-1" style={{ color: '#1a1a1a', opacity: 0.7 }}>정답률 {stats.accuracy}%</div>
           </div>
 
-          <div className="card">
-            <div className="text-2xl font-bold text-red-500">{stats.dueToday}</div>
-            <div className="text-xs text-gray-500 mt-0.5">오늘 복습 예정</div>
+          <div className="card" style={{ background: '#e4c1f9' }}>
+            <div className="text-2xl font-bold" style={{ color: '#1a1a1a' }}>{stats.dueToday}</div>
+            <div className="text-xs mt-0.5" style={{ color: '#1a1a1a' }}>오늘 복습할 것</div>
           </div>
 
-          <div className="card">
-            <div className="text-2xl font-bold text-purple-500">{stats.dailyGoal}</div>
-            <div className="text-xs text-gray-500 mt-0.5">일일 목표 단어</div>
+          <div className="card" style={{ background: '#d0f4de' }}>
+            <div className="text-2xl font-bold" style={{ color: '#1a1a1a' }}>{stats.dailyGoal}</div>
+            <div className="text-xs mt-0.5" style={{ color: '#1a1a1a' }}>하루 목표</div>
           </div>
         </div>
 
         {/* Weekly Activity Chart */}
         <div className="card mb-4">
-          <h3 className="font-semibold text-gray-700 mb-4 text-sm">📈 이번 주 학습 활동</h3>
+          <h3 className="font-semibold text-gray-700 mb-4 text-sm">📈 이번 주 활동</h3>
           <ResponsiveContainer width="100%" height={150}>
             <BarChart data={stats.weeklyActivity} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
               <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#9CA3AF' }} />
               <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} />
               <Tooltip
-                contentStyle={{ borderRadius: '12px', border: '1px solid #FFB3CE', fontSize: '12px' }}
-                formatter={(value: number, name: string) => [value, name === 'added' ? '추가 단어' : '퀴즈 답변']}
+                contentStyle={{ borderRadius: '12px', border: '1px solid #ff99c8', fontSize: '12px' }}
+                formatter={(value: number, name: string) => [value, name === 'added' ? '추가한 단어' : '퀴즈']}
               />
-              <Bar dataKey="added" fill="#FF6B9D" radius={[4, 4, 0, 0]} name="added" />
-              <Bar dataKey="quizzed" fill="#A78BFA" radius={[4, 4, 0, 0]} name="quizzed" />
+              <Bar dataKey="added" fill="#a9def9" radius={[4, 4, 0, 0]} name="added" />
+              <Bar dataKey="quizzed" fill="#e4c1f9" radius={[4, 4, 0, 0]} name="quizzed" />
             </BarChart>
           </ResponsiveContainer>
           <div className="flex gap-4 justify-center mt-2 text-xs text-gray-500">
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-pink-400 inline-block"></span>추가 단어</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-purple-400 inline-block"></span>퀴즈 답변</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#a9def9' }}></span>추가한 단어</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#e4c1f9' }}></span>퀴즈</span>
           </div>
         </div>
 
@@ -178,7 +179,7 @@ export default function StatsPage() {
                     ))}
                   </Pie>
                   <Tooltip
-                    contentStyle={{ borderRadius: '12px', border: '1px solid #FFB3CE', fontSize: '12px' }}
+                    contentStyle={{ borderRadius: '12px', border: '1px solid #ff99c8', fontSize: '12px' }}
                   />
                 </PieChart>
               </ResponsiveContainer>

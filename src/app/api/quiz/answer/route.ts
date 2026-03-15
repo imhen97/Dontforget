@@ -1,4 +1,3 @@
-export const runtime = 'edge'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUserFromRequest } from '@/lib/auth'
@@ -43,10 +42,25 @@ export async function POST(req: NextRequest) {
     },
   })
 
+  // 냥 획득 (정답 +2냥)
+  if (correct) {
+    try {
+      const u = await prisma.user.findUnique({ where: { id: authUser.userId }, select: { nyang: true } })
+      if (u != null) {
+        await prisma.user.update({
+          where: { id: authUser.userId },
+          data: { nyang: (u.nyang ?? 0) + 2 },
+        })
+      }
+    } catch (err) {
+      console.error('[quiz/answer] nyang update:', err)
+    }
+  }
+
   // Update streak
   await updateStreak(authUser.userId)
 
-  return NextResponse.json({ answer, nextReview: srs.nextReview })
+  return NextResponse.json({ answer, nextReview: srs.nextReview, nyangEarned: correct ? 2 : 0 })
 }
 
 async function updateStreak(userId: string) {

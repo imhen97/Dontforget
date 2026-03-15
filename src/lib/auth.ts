@@ -1,6 +1,6 @@
 import { SignJWT, jwtVerify } from 'jose'
-import { cookies } from 'next/headers'
 import { NextRequest } from 'next/server'
+import { auth } from '@/../auth'
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'fallback-secret-change-in-production-32ch'
@@ -30,14 +30,15 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
 }
 
 export async function getAuthUser(): Promise<JWTPayload | null> {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('auth_token')?.value
-  if (!token) return null
-  return verifyToken(token)
+  const session = await auth()
+  if (!session?.user?.id) return null
+  return {
+    userId: session.user.id,
+    username: session.user.name ?? '',
+    email: session.user.email ?? '',
+  }
 }
 
-export async function getAuthUserFromRequest(req: NextRequest): Promise<JWTPayload | null> {
-  const token = req.cookies.get('auth_token')?.value
-  if (!token) return null
-  return verifyToken(token)
+export async function getAuthUserFromRequest(_req: NextRequest): Promise<JWTPayload | null> {
+  return getAuthUser()
 }

@@ -1,4 +1,3 @@
-export const runtime = 'edge'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUserFromRequest } from '@/lib/auth'
@@ -19,10 +18,16 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     data: {
       word: data.word ?? word.word,
       translation: data.translation ?? word.translation,
-      exampleEn: data.exampleEn ?? word.exampleEn,
-      exampleKo: data.exampleKo ?? word.exampleKo,
+      exampleEn: data.exampleEn !== undefined ? data.exampleEn : word.exampleEn,
+      exampleKo: data.exampleKo !== undefined ? data.exampleKo : word.exampleKo,
+      examples: data.examples !== undefined ? data.examples : word.examples,
       topic: data.topic ?? word.topic,
       mastered: data.mastered ?? word.mastered,
+      type: data.type ?? word.type,
+      ...(data.easeFactor !== undefined && { easeFactor: data.easeFactor }),
+      ...(data.interval !== undefined && { interval: data.interval }),
+      ...(data.repetitions !== undefined && { repetitions: data.repetitions }),
+      ...(data.nextReview !== undefined && { nextReview: new Date(data.nextReview) }),
     },
   })
 

@@ -16,9 +16,9 @@ interface QuizQuestion {
 type QuizMode = 'menu' | 'quiz' | 'result'
 
 const QUIZ_TYPES = [
-  { id: 'daily', icon: '📅', title: '오늘의 복습', desc: 'Anki 방식 - 복습 예정 단어', color: 'from-pink-400 to-pink-500' },
-  { id: 'weekly_wrong', icon: '❌', title: '틀린 문제 모음', desc: '최근 1주일 오답 단어', color: 'from-red-400 to-red-500' },
-  { id: 'random', icon: '🎲', title: '랜덤 퀴즈', desc: '전체 단어 중 랜덤', color: 'from-purple-400 to-purple-500' },
+  { id: 'daily', icon: '📅', title: '오늘의 복습', desc: 'Anki 방식 - 복습 예정 단어', bg: '#ff99c8' },
+  { id: 'weekly_wrong', icon: '❌', title: '틀린 문제 모음', desc: '최근 1주일 오답 단어', bg: '#e4c1f9' },
+  { id: 'random', icon: '🎲', title: '랜덤 퀴즈', desc: '전체 단어 중 랜덤', bg: '#a9def9' },
 ]
 
 export default function QuizPage() {
@@ -49,7 +49,7 @@ export default function QuizPage() {
         ])
 
         if (!dailyRes.questions?.length) {
-          alert(dailyRes.message || '퀴즈할 단어가 없습니다!')
+          alert(dailyRes.message || '퀴즈할 단어가 없어요.')
           setLoading(false)
           return
         }
@@ -64,7 +64,7 @@ export default function QuizPage() {
         const data = await res.json()
 
         if (!data.questions?.length) {
-          alert(data.message || '퀴즈할 단어가 없습니다!')
+          alert(data.message || '퀴즈할 단어가 없어요.')
           setLoading(false)
           return
         }
@@ -82,7 +82,7 @@ export default function QuizPage() {
       setStartTime(Date.now())
       setMode('quiz')
     } catch {
-      alert('퀴즈를 불러오는데 실패했습니다')
+      alert('퀴즈를 불러오지 못했어요. 다시 시도해주세요.')
     } finally {
       setLoading(false)
     }
@@ -125,11 +125,11 @@ export default function QuizPage() {
   }
 
   const getQuestionText = (q: QuizQuestion) => {
-    if (q.type === 'en_to_ko') return { question: q.word, hint: '이 단어의 한국어 뜻은?' }
-    if (q.type === 'ko_to_en') return { question: q.translation, hint: '이 뜻에 해당하는 영단어는?' }
+    if (q.type === 'en_to_ko') return { question: q.word, hint: '한국어 뜻은?' }
+    if (q.type === 'ko_to_en') return { question: q.translation, hint: '영어로?' }
     // fill_blank
     const blanked = q.exampleEn.replace(new RegExp(q.word, 'gi'), '______')
-    return { question: blanked, hint: '빈칸에 알맞은 단어는?' }
+    return { question: blanked, hint: '빈칸에 들어갈 단어는?' }
   }
 
   if (mode === 'menu') {
@@ -138,7 +138,7 @@ export default function QuizPage() {
         <Navbar />
         <main className="max-w-2xl mx-auto px-4 py-6">
           <h1 className="page-title">✏️ 퀴즈</h1>
-          <p className="text-gray-500 text-sm mb-6">어떤 방식으로 공부할까요?</p>
+          <p className="text-gray-500 text-sm mb-6">방식을 선택하세요</p>
 
           <div className="space-y-3">
             {QUIZ_TYPES.map(qt => (
@@ -146,7 +146,8 @@ export default function QuizPage() {
                 key={qt.id}
                 onClick={() => startQuiz(qt.id)}
                 disabled={loading}
-                className={`w-full bg-gradient-to-r ${qt.color} text-white rounded-2xl p-5 flex items-center gap-4 hover:opacity-90 transition-all active:scale-[0.98] shadow-sm`}
+                className="w-full rounded-2xl p-5 flex items-center gap-4 hover:opacity-90 transition-all active:scale-[0.98]"
+                style={{ background: qt.bg, border: '2.5px solid #1a1a1a', boxShadow: '3px 3px 0px #1a1a1a', color: '#1a1a1a' }}
               >
                 <span className="text-3xl">{qt.icon}</span>
                 <div className="text-left">
@@ -158,10 +159,10 @@ export default function QuizPage() {
           </div>
 
           <div className="mt-6 card">
-            <h3 className="font-semibold text-gray-700 mb-2 text-sm">💡 Anki 복습 시스템이란?</h3>
+            <h3 className="font-semibold text-gray-700 mb-2 text-sm">💡 Anki 시스템</h3>
             <p className="text-xs text-gray-500 leading-relaxed">
-              SM-2 알고리즘을 활용하여 맞힌 단어는 더 긴 간격으로, 틀린 단어는 더 자주 복습하도록 자동 조정됩니다.
-              꾸준히 복습하면 장기 기억에 효과적이에요! 🧠
+              SM-2 알고리즘으로 맞힌 단어는 더 오래, 틀린 단어는 더 자주 나와요.
+              꾸준히 하면 기억이 오래 가요! 🧠
             </p>
           </div>
         </main>
@@ -173,7 +174,7 @@ export default function QuizPage() {
     const total = questions.length
     const pct = Math.round((score / total) * 100)
     const emoji = pct >= 90 ? '🏆' : pct >= 70 ? '👏' : pct >= 50 ? '💪' : '📚'
-    const message = pct >= 90 ? '완벽해요!' : pct >= 70 ? '잘했어요!' : pct >= 50 ? '좀 더 노력해봐요!' : '다시 도전해봐요!'
+    const message = pct >= 90 ? '완벽해요!' : pct >= 70 ? '잘했어요!' : pct >= 50 ? '조금만 더 해보세요!' : '다시 도전해보세요!'
 
     return (
       <div className="min-h-screen pb-24 md:pb-6">
@@ -185,13 +186,13 @@ export default function QuizPage() {
             <p className="text-gray-500 text-sm mb-6">퀴즈가 끝났어요!</p>
 
             <div className="card mb-6">
-              <div className="text-4xl font-bold text-pink-500 mb-1">{score} / {total}</div>
-              <div className="text-gray-500 text-sm">정답률 {pct}%</div>
+              <div className="text-4xl font-bold mb-1" style={{ color: '#1a1a1a' }}>{score} / {total}</div>
+              <div className="text-sm" style={{ color: '#888' }}>정답률 {pct}%</div>
 
-              <div className="w-full bg-pink-100 rounded-full h-3 mt-4">
+              <div className="w-full rounded-full h-3 mt-4" style={{ background: '#e4c1f9' }}>
                 <div
-                  className="bg-gradient-to-r from-pink-400 to-pink-500 h-3 rounded-full transition-all duration-1000"
-                  style={{ width: `${pct}%` }}
+                  className="h-3 rounded-full transition-all duration-1000"
+                  style={{ width: `${pct}%`, background: '#ff99c8' }}
                 />
               </div>
             </div>
@@ -201,9 +202,8 @@ export default function QuizPage() {
               {answers.map((correct, i) => (
                 <div
                   key={i}
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${
-                    correct ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-500'
-                  }`}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold"
+                  style={{ background: correct ? '#d0f4de' : '#ff99c8', color: '#1a1a1a' }}
                 >
                   {correct ? '✓' : '✗'}
                 </div>
@@ -235,7 +235,7 @@ export default function QuizPage() {
       <main className="max-w-md mx-auto px-4 py-6">
         {/* Progress */}
         <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => setMode('menu')} className="text-gray-400 hover:text-gray-600">
+          <button onClick={() => setMode('menu')} className="hover:opacity-70" style={{ color: '#1a1a1a' }}>
             ←
           </button>
           <div className="flex-1">
@@ -243,10 +243,10 @@ export default function QuizPage() {
               <span>{currentIdx + 1} / {questions.length}</span>
               <span>점수: {score}</span>
             </div>
-            <div className="w-full bg-pink-100 rounded-full h-2">
+            <div className="w-full rounded-full h-2" style={{ background: '#e4c1f9' }}>
               <div
-                className="bg-gradient-to-r from-pink-400 to-pink-500 h-2 rounded-full transition-all"
-                style={{ width: `${progress}%` }}
+                className="h-2 rounded-full transition-all"
+                style={{ width: `${progress}%`, background: '#ff99c8' }}
               />
             </div>
           </div>
@@ -254,7 +254,7 @@ export default function QuizPage() {
 
         {/* Question Card */}
         <div className="card mb-4 text-center animate-fade-in">
-          <div className="text-xs text-pink-500 font-medium mb-3 uppercase tracking-wide">{hint}</div>
+          <div className="text-xs font-bold mb-3 px-3 py-1 rounded-full inline-block" style={{ background: '#ff99c8', color: '#1a1a1a' }}>{hint}</div>
           <div className="text-2xl font-bold text-gray-800 mb-2 leading-snug">{question}</div>
           {current.type !== 'fill_blank' && current.exampleEn && (
             <p className="text-sm text-gray-400 italic mt-2">예: {current.exampleEn}</p>
@@ -264,14 +264,18 @@ export default function QuizPage() {
         {/* Choices */}
         <div className="grid grid-cols-2 gap-3">
           {current.choices.map((choice, i) => {
-            let style = 'bg-white border-2 border-pink-200 text-gray-700 hover:border-pink-400'
+            let bgColor = '#fff'
+            let borderColor = '#a9def9'
+            let textColor = '#1a1a1a'
+            let extraClass = 'hover:border-[#ff99c8]'
             if (showAnswer) {
-              if (i === current.correctIndex) style = 'bg-green-100 border-2 border-green-400 text-green-700 font-semibold'
-              else if (i === selected && i !== current.correctIndex) style = 'bg-red-100 border-2 border-red-400 text-red-600'
-              else style = 'bg-gray-50 border-2 border-gray-200 text-gray-400'
+              if (i === current.correctIndex) { bgColor = '#d0f4de'; borderColor = '#d0f4de'; extraClass = 'font-semibold' }
+              else if (i === selected && i !== current.correctIndex) { bgColor = '#ff99c8'; borderColor = '#ff99c8' }
+              else { bgColor = '#fcf6bd'; borderColor = '#fcf6bd'; textColor = '#888' }
             } else if (selected === i) {
-              style = 'bg-pink-100 border-2 border-pink-400 text-pink-700'
+              bgColor = '#ff99c8'; borderColor = '#ff99c8'
             }
+            const style = extraClass
 
             return (
               <button
@@ -279,6 +283,7 @@ export default function QuizPage() {
                 onClick={() => handleAnswer(i)}
                 disabled={showAnswer}
                 className={`${style} rounded-xl p-3 text-sm text-center transition-all active:scale-95 min-h-[60px] flex items-center justify-center`}
+                style={{ background: bgColor, border: `2px solid ${borderColor}`, color: textColor }}
               >
                 {choice}
               </button>
@@ -288,14 +293,17 @@ export default function QuizPage() {
 
         {showAnswer && (
           <div className="mt-4 animate-fade-in">
-            <div className={`card text-center mb-4 ${selected === current.correctIndex ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+            <div
+              className="card text-center mb-4"
+              style={selected === current.correctIndex ? { background: '#d0f4de', borderColor: '#d0f4de' } : { background: '#ff99c8', borderColor: '#ff99c8' }}
+            >
               <div className="text-2xl mb-1">{selected === current.correctIndex ? '🎉' : '😅'}</div>
-              <div className={`font-semibold ${selected === current.correctIndex ? 'text-green-700' : 'text-red-600'}`}>
-                {selected === current.correctIndex ? '정답이에요!' : `정답: ${current.choices[current.correctIndex]}`}
+              <div className="font-semibold" style={{ color: '#1a1a1a' }}>
+                {selected === current.correctIndex ? '정답! 🎉' : `정답: ${current.choices[current.correctIndex]}`}
               </div>
             </div>
             <button onClick={nextQuestion} className="btn-primary w-full">
-              {currentIdx + 1 >= questions.length ? '결과 보기 🎊' : '다음 문제 →'}
+              {currentIdx + 1 >= questions.length ? '결과 보기 🎊' : '다음 →'}
             </button>
           </div>
         )}

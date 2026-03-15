@@ -109,7 +109,7 @@ export default function PostDetailPage() {
         <div className="card mb-4">
           <div className="flex justify-between items-start mb-3">
             <div>
-              <span className="tag bg-purple-100 text-purple-600 text-xs mb-2">{post.category}</span>
+              <span className="tag text-xs mb-2" style={{ background: '#e4c1f9', color: '#1a1a1a' }}>{post.category}</span>
               <h1 className="text-xl font-bold text-gray-800 mt-1">{post.title}</h1>
             </div>
             {post.isMe && (
@@ -121,7 +121,7 @@ export default function PostDetailPage() {
 
           <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap mb-4">{post.content}</p>
 
-          <div className="flex items-center justify-between text-xs text-gray-400 pt-3 border-t border-pink-50">
+          <div className="flex items-center justify-between text-xs pt-3 border-t" style={{ color: '#888', borderColor: '#fcf6bd' }}>
             <div className="flex items-center gap-2">
               <span className="font-medium text-gray-600">{post.user.username}</span>
               <span>·</span>
@@ -131,7 +131,8 @@ export default function PostDetailPage() {
               <span>💬 {post._count.comments}</span>
               <button
                 onClick={handleLike}
-                className={`flex items-center gap-1 transition-colors ${post.liked ? 'text-pink-500' : 'text-gray-400 hover:text-pink-400'}`}
+                className="flex items-center gap-1 transition-colors"
+                style={{ color: post.liked ? '#ff99c8' : '#aaa' }}
               >
                 <span>{post.liked ? '❤️' : '🤍'}</span>
                 <span>{post._count.likes}</span>
@@ -151,7 +152,7 @@ export default function PostDetailPage() {
           ) : (
             <div className="space-y-3">
               {post.comments.map(comment => (
-                <div key={comment.id} className="bg-pink-50 rounded-xl p-3">
+                <div key={comment.id} className="rounded-xl p-3" style={{ background: '#fcf6bd' }}>
                   <div className="flex justify-between items-center mb-1">
                     <span className="text-xs font-semibold text-gray-700">{comment.user.username}</span>
                     <span className="text-xs text-gray-400">
