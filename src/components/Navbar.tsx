@@ -65,7 +65,7 @@ export default function Navbar() {
         <Link href="/dashboard" className="flex items-center gap-2 select-none mr-6">
           <CatSvg size={30} />
           <span style={{ fontSize: '1.15rem', fontWeight: 800, color: '#3a3038', letterSpacing: '0.01em' }}>
-            깜냥 수첩
+            답답노트
           </span>
         </Link>
 

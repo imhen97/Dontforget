@@ -104,7 +104,7 @@ export default function AuthPage() {
             color: '#1a1a1a',
             letterSpacing: '0.03em',
           }}>
-            깜냥 수첩
+            답답노트
           </h1>
           <p style={{
             fontFamily: "'Nunito', sans-serif",
