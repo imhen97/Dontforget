@@ -9,8 +9,6 @@ export default function KkamnyangiCat({ equippedItems = {}, size = 120 }: Kkamny
   const hat = equippedItems['hat']
   const accessory = equippedItems['accessory']
 
-  const scale = size / 120
-
   return (
     <svg
       width={size}
@@ -19,144 +17,115 @@ export default function KkamnyangiCat({ equippedItems = {}, size = 120 }: Kkamny
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* ── BODY ── */}
-      <ellipse cx="60" cy="120" rx="32" ry="36" fill="#1a1a1a" />
+      {/* ── BODY (chubby round) ── */}
+      <ellipse cx="60" cy="130" rx="38" ry="32" fill="#ffffff"/>
 
-      {/* ── TAIL ── */}
-      <path
-        d="M90 148 Q115 140 112 120 Q110 108 100 112"
-        stroke="#1a1a1a"
-        strokeWidth="8"
-        strokeLinecap="round"
-        fill="none"
-      />
+      {/* ── STUBBY ARMS ── */}
+      <ellipse cx="18" cy="120" rx="14" ry="9" fill="#ffffff" transform="rotate(-30 18 120)"/>
+      <ellipse cx="102" cy="120" rx="14" ry="9" fill="#ffffff" transform="rotate(30 102 120)"/>
 
-      {/* ── FRONT PAWS ── */}
-      <ellipse cx="43" cy="154" rx="10" ry="7" fill="#1a1a1a" />
-      <ellipse cx="77" cy="154" rx="10" ry="7" fill="#1a1a1a" />
+      {/* ── HAIR SPIKES ── */}
+      <polygon points="30,52 36,28 46,55" fill="#fbff12"/>
+      <polygon points="46,44 54,18 62,44" fill="#fbff12"/>
+      <polygon points="60,44 68,18 76,44" fill="#fbff12"/>
+      <polygon points="76,55 86,28 92,52" fill="#fbff12"/>
 
       {/* ── HEAD ── */}
-      <ellipse cx="60" cy="68" rx="30" ry="28" fill="#1a1a1a" />
+      <circle cx="60" cy="72" r="40" fill="#ffffff"/>
 
-      {/* ── EARS ── */}
-      <polygon points="36,48 28,22 50,40" fill="#1a1a1a" />
-      <polygon points="84,48 92,22 70,40" fill="#1a1a1a" />
-      {/* inner ear */}
-      <polygon points="38,46 32,28 48,41" fill="#ff99c8" opacity="0.7" />
-      <polygon points="82,46 88,28 72,41" fill="#ff99c8" opacity="0.7" />
+      {/* ── EYEBROWS (furrowed/frustrated) ── */}
+      <line x1="28" y1="56" x2="46" y2="62" stroke="#0c0f0a" strokeWidth="4" strokeLinecap="round"/>
+      <line x1="74" y1="62" x2="92" y2="56" stroke="#0c0f0a" strokeWidth="4" strokeLinecap="round"/>
 
-      {/* ── FACE ── */}
-      {/* Eyes */}
-      <ellipse cx="48" cy="64" rx="5" ry="6" fill="#fcf6bd" />
-      <ellipse cx="72" cy="64" rx="5" ry="6" fill="#fcf6bd" />
-      <ellipse cx="49" cy="65" rx="3" ry="4" fill="#1a1a1a" />
-      <ellipse cx="73" cy="65" rx="3" ry="4" fill="#1a1a1a" />
-      {/* eye shine */}
-      <circle cx="50" cy="63" r="1.2" fill="white" />
-      <circle cx="74" cy="63" r="1.2" fill="white" />
+      {/* ── EYES ── */}
+      <circle cx="44" cy="72" r="10" fill="#0c0f0a"/>
+      <circle cx="76" cy="72" r="10" fill="#0c0f0a"/>
+      <circle cx="47" cy="68" r="3.5" fill="#ffffff"/>
+      <circle cx="79" cy="68" r="3.5" fill="#ffffff"/>
 
-      {/* Nose */}
-      <polygon points="60,73 57,77 63,77" fill="#ff99c8" />
+      {/* ── CHUBBY CHEEKS ── */}
+      <circle cx="20" cy="80" r="10" fill="#ff206e" opacity="0.3"/>
+      <circle cx="100" cy="80" r="10" fill="#ff206e" opacity="0.3"/>
 
-      {/* Mouth */}
-      <path d="M57,77 Q60,81 63,77" stroke="#ff99c8" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+      {/* ── NOSE ── */}
+      <ellipse cx="60" cy="82" rx="4.5" ry="3.5" fill="#ff206e" opacity="0.6"/>
 
-      {/* Whiskers */}
-      <line x1="30" y1="73" x2="52" y2="74" stroke="#888" strokeWidth="1" />
-      <line x1="30" y1="77" x2="52" y2="76" strokeWidth="1" stroke="#888" />
-      <line x1="68" y1="74" x2="90" y2="73" strokeWidth="1" stroke="#888" />
-      <line x1="68" y1="76" x2="90" y2="77" strokeWidth="1" stroke="#888" />
+      {/* ── MOUTH (grimace) ── */}
+      <path d="M50 92 Q60 86 70 92" stroke="#0c0f0a" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
 
-      {/* ── BELLY PATCH ── */}
-      <ellipse cx="60" cy="118" rx="18" ry="22" fill="#2a2a2a" />
+      {/* ── SWEAT DROP ── */}
+      <path d="M100 20 Q106 30 100 36 Q94 30 100 20Z" fill="#41ead4"/>
 
       {/* ══ ACCESSORY LAYER ══ */}
       {accessory === 'acc_ribbon' && (
         <g>
-          {/* Pink ribbon on neck */}
-          <path d="M48,92 Q60,98 72,92" stroke="#ff99c8" strokeWidth="3" fill="none" strokeLinecap="round" />
-          <circle cx="60" cy="93" r="4" fill="#ff99c8" />
-          <path d="M56,91 L52,86 L60,93 L52,91 Z" fill="#ff99c8" />
-          <path d="M64,91 L68,86 L60,93 L68,91 Z" fill="#ff99c8" />
+          <path d="M44,104 Q60,112 76,104" stroke="#ff206e" strokeWidth="4" fill="none" strokeLinecap="round"/>
+          <circle cx="60" cy="105" r="6" fill="#ff206e"/>
+          <path d="M54,103 L48,96 L60,105 L48,103 Z" fill="#ff206e"/>
+          <path d="M66,103 L72,96 L60,105 L72,103 Z" fill="#ff206e"/>
         </g>
       )}
       {accessory === 'acc_glasses' && (
         <g>
-          {/* Round glasses */}
-          <circle cx="48" cy="64" r="8" stroke="#a9def9" strokeWidth="2" fill="none" />
-          <circle cx="72" cy="64" r="8" stroke="#a9def9" strokeWidth="2" fill="none" />
-          <line x1="56" y1="64" x2="64" y2="64" stroke="#a9def9" strokeWidth="2" />
-          <line x1="28" y1="62" x2="40" y2="63" stroke="#a9def9" strokeWidth="1.5" />
-          <line x1="80" y1="63" x2="92" y2="62" stroke="#a9def9" strokeWidth="1.5" />
+          <circle cx="44" cy="72" r="14" stroke="#41ead4" strokeWidth="3" fill="none"/>
+          <circle cx="76" cy="72" r="14" stroke="#41ead4" strokeWidth="3" fill="none"/>
+          <line x1="58" y1="72" x2="62" y2="72" stroke="#41ead4" strokeWidth="3"/>
+          <line x1="18" y1="70" x2="30" y2="71" stroke="#41ead4" strokeWidth="2.5"/>
+          <line x1="90" y1="71" x2="102" y2="70" stroke="#41ead4" strokeWidth="2.5"/>
         </g>
       )}
       {accessory === 'acc_bowtie' && (
         <g>
-          {/* Bow tie at neck */}
-          <path d="M52,90 L60,95 L68,90 L60,95 Z" fill="#a9def9" />
-          <path d="M52,100 L60,95 L68,100 L60,95 Z" fill="#a9def9" />
-          <circle cx="60" cy="95" r="3" fill="#1a1a1a" />
+          <path d="M48,102 L60,110 L72,102 L60,110 Z" fill="#41ead4"/>
+          <path d="M48,118 L60,110 L72,118 L60,110 Z" fill="#41ead4"/>
+          <circle cx="60" cy="110" r="5" fill="#0c0f0a"/>
         </g>
       )}
 
       {/* ══ HAT LAYER ══ */}
       {hat === 'hat_crown' && (
         <g>
-          {/* Gold crown */}
-          <rect x="40" y="32" width="40" height="14" rx="2" fill="#fcf6bd" stroke="#e8c800" strokeWidth="1" />
-          <polygon points="40,32 47,18 54,32" fill="#fcf6bd" stroke="#e8c800" strokeWidth="1" />
-          <polygon points="53,32 60,16 67,32" fill="#fcf6bd" stroke="#e8c800" strokeWidth="1" />
-          <polygon points="66,32 73,18 80,32" fill="#fcf6bd" stroke="#e8c800" strokeWidth="1" />
-          <circle cx="60" cy="26" r="3" fill="#ff99c8" />
-          <circle cx="47" cy="28" r="2" fill="#a9def9" />
-          <circle cx="73" cy="28" r="2" fill="#d0f4de" />
+          <rect x="36" y="24" width="48" height="18" rx="3" fill="#fbff12" stroke="#e8c800" strokeWidth="1.5"/>
+          <polygon points="36,24 46,6 56,24" fill="#fbff12" stroke="#e8c800" strokeWidth="1.5"/>
+          <polygon points="50,24 60,4 70,24" fill="#fbff12" stroke="#e8c800" strokeWidth="1.5"/>
+          <polygon points="64,24 74,6 84,24" fill="#fbff12" stroke="#e8c800" strokeWidth="1.5"/>
+          <circle cx="60" cy="16" r="4" fill="#ff206e"/>
+          <circle cx="46" cy="20" r="3" fill="#41ead4"/>
+          <circle cx="74" cy="20" r="3" fill="#41ead4"/>
         </g>
       )}
       {hat === 'hat_witch' && (
         <g>
-          {/* Witch hat */}
-          <ellipse cx="60" cy="40" rx="24" ry="6" fill="#2a1a2a" />
-          <polygon points="60,5 42,40 78,40" fill="#2a1a2a" />
-          <ellipse cx="60" cy="40" rx="24" ry="6" fill="#2a1a2a" />
-          {/* hat band */}
-          <rect x="38" y="35" width="44" height="5" rx="2" fill="#e4c1f9" />
-          {/* star */}
-          <text x="55" y="28" fontSize="10" fill="#fcf6bd">★</text>
+          <ellipse cx="60" cy="44" rx="30" ry="8" fill="#161a15"/>
+          <polygon points="60,4 38,44 82,44" fill="#161a15"/>
+          <rect x="32" y="38" width="56" height="7" rx="3" fill="#fbff12"/>
         </g>
       )}
       {hat === 'hat_strawberry' && (
         <g>
-          {/* Strawberry hat */}
-          <ellipse cx="60" cy="38" rx="18" ry="16" fill="#ff6b6b" />
-          {/* seeds */}
-          <ellipse cx="54" cy="35" rx="1.5" ry="2" fill="#fcf6bd" transform="rotate(-10,54,35)" />
-          <ellipse cx="62" cy="32" rx="1.5" ry="2" fill="#fcf6bd" />
-          <ellipse cx="67" cy="38" rx="1.5" ry="2" fill="#fcf6bd" transform="rotate(10,67,38)" />
-          <ellipse cx="55" cy="43" rx="1.5" ry="2" fill="#fcf6bd" transform="rotate(-5,55,43)" />
-          {/* leaves */}
-          <path d="M55,24 Q60,18 65,24" fill="#d0f4de" />
-          <path d="M52,26 Q55,18 58,24" fill="#d0f4de" />
-          <path d="M62,24 Q65,18 68,26" fill="#d0f4de" />
+          <ellipse cx="60" cy="40" rx="24" ry="22" fill="#ff206e"/>
+          <ellipse cx="52" cy="36" rx="2.5" ry="3.5" fill="#fbff12" transform="rotate(-10,52,36)"/>
+          <ellipse cx="62" cy="30" rx="2.5" ry="3.5" fill="#fbff12"/>
+          <ellipse cx="68" cy="40" rx="2.5" ry="3.5" fill="#fbff12" transform="rotate(10,68,40)"/>
+          <ellipse cx="53" cy="46" rx="2.5" ry="3.5" fill="#fbff12" transform="rotate(-5,53,46)"/>
+          <path d="M50,22 Q60,14 70,22" fill="#41ead4"/>
+          <path d="M46,25 Q50,14 55,22" fill="#41ead4"/>
+          <path d="M65,22 Q70,14 74,25" fill="#41ead4"/>
         </g>
       )}
       {hat === 'hat_graduate' && (
         <g>
-          {/* Graduation cap */}
-          <rect x="44" y="34" width="32" height="8" rx="1" fill="#1a1a2a" />
-          <polygon points="60,18 38,34 82,34" fill="#1a1a2a" />
-          <polygon points="60,18 82,34 80,38 60,22 40,38 38,34" fill="#2a2a3a" />
-          {/* tassel */}
-          <line x1="78" y1="34" x2="84" y2="44" stroke="#fcf6bd" strokeWidth="1.5" />
-          <circle cx="84" cy="46" r="2" fill="#fcf6bd" />
+          <rect x="40" y="30" width="40" height="12" rx="2" fill="#161a15"/>
+          <polygon points="60,8 30,30 90,30" fill="#161a15"/>
+          <line x1="86" y1="30" x2="94" y2="46" stroke="#fbff12" strokeWidth="2.5"/>
+          <circle cx="94" cy="48" r="3.5" fill="#fbff12"/>
         </g>
       )}
       {hat === 'hat_santa' && (
         <g>
-          {/* Santa hat */}
-          <path d="M38,40 Q45,14 60,8 Q72,14 82,40 Z" fill="#e83030" />
-          <ellipse cx="60" cy="40" rx="24" ry="7" fill="white" />
-          {/* pom pom */}
-          <circle cx="62" cy="10" r="6" fill="white" />
+          <path d="M34,44 Q42,14 60,8 Q76,14 86,44 Z" fill="#ff206e"/>
+          <ellipse cx="60" cy="44" rx="28" ry="9" fill="white"/>
+          <circle cx="62" cy="10" r="8" fill="white"/>
         </g>
       )}
     </svg>
