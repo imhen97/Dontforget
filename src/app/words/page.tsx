@@ -333,6 +333,33 @@ function WordsContent() {
   }
 
   const [aiFieldLoading, setAiFieldLoading] = useState<'translation' | 'examples' | null>(null)
+  const [koToEnLoading, setKoToEnLoading] = useState(false)
+
+  const isKoreanInput = /[\uAC00-\uD7A3]/.test(form.word)
+
+  const convertKoToEn = async () => {
+    if (!form.word.trim()) return
+    setKoToEnLoading(true)
+    try {
+      const res = await fetch('/api/words/ai-field', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ word: form.word.trim(), field: 'koToEn' }),
+      })
+      const data: any = await res.json()
+      if (res.ok && data.value) {
+        const koreanOriginal = form.word.trim()
+        setForm(f => ({
+          ...f,
+          word: data.value,
+          translation: f.translation || koreanOriginal,
+        }))
+        setInputLang('en')
+      }
+    } catch { /* ignore */ } finally {
+      setKoToEnLoading(false)
+    }
+  }
 
   const autoTranslateExample = (index: number, text: string) => {
     if (exampleTimers.current[index]) clearTimeout(exampleTimers.current[index]!)
@@ -999,6 +1026,16 @@ function WordsContent() {
                   </ul>
                 )}
               </div>
+              {isKoreanInput && (
+                <button
+                  type="button"
+                  onClick={convertKoToEn}
+                  disabled={koToEnLoading}
+                  className="w-full py-2.5 rounded-2xl text-sm font-semibold transition-all disabled:opacity-50 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:opacity-90 active:scale-[0.98]"
+                >
+                  {koToEnLoading ? '🤖 영어 단어 생성 중...' : '✨ AI로 영어 단어 생성하기'}
+                </button>
+              )}
 
               <div>
                 <div className="flex items-center justify-between mb-1">

@@ -10,6 +10,19 @@ export async function POST(req: NextRequest) {
   if (!word || !field) return NextResponse.json({ error: 'Missing params' }, { status: 400 })
 
   try {
+    if (field === 'koToEn') {
+      const response = await client.chat.completions.create({
+        model: 'gpt-4o-mini',
+        max_tokens: 128,
+        messages: [{
+          role: 'user',
+          content: `"${word}"의 가장 대표적인 영단어 또는 영어 표현 하나만 알려줘. 단어나 숙어만, 다른 설명 없이.`,
+        }],
+      })
+      const englishWord = response.choices[0]?.message?.content?.trim().replace(/['".,]/g, '') ?? word
+      return NextResponse.json({ value: englishWord })
+    }
+
     if (field === 'translateExample') {
       const response = await client.chat.completions.create({
         model: 'gpt-4o-mini',
