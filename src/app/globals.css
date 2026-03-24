@@ -17,10 +17,10 @@
 * { box-sizing: border-box; }
 
 body {
-  background-color: var(--yellow);
+  background-color: #f8f7ff;
   font-family: 'Plus Jakarta Sans', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
   min-height: 100vh;
-  color: var(--ink);
+  color: #1a1a1a;
   -webkit-tap-highlight-color: transparent;
   font-size: 16px;
 }
@@ -31,84 +31,65 @@ body {
 
   /* ── 카드 ── */
   .card {
-    @apply p-4 md:p-5 relative overflow-hidden;
-    background: var(--paper);
-    border-radius: 14px;
-    border: 2px solid var(--purple);
-    box-shadow: none;
-    transition: transform 0.15s ease;
+    @apply p-4 md:p-5 relative overflow-hidden bg-white/70 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-md hover:shadow-xl transition-all duration-300;
   }
   .card:hover {
-    filter: brightness(0.97);
+    transform: translateY(-1px);
   }
 
-  /* ── 버튼 primary (기본: 라벤더) ── */
+  /* ── 버튼 primary (purple gradient) ── */
   .btn-primary {
-    @apply font-extrabold transition-all duration-150 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed;
+    @apply font-semibold transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed;
+    @apply bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-2xl shadow-lg hover:shadow-xl;
     padding: 12px 20px;
     min-height: 44px;
     font-size: 1rem;
-    background: var(--purple);
-    color: var(--ink);
-    border-radius: 99px;
-    border: 2.5px solid var(--purple);
-    box-shadow: 3px 3px 0px var(--ink);
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
   .btn-primary:hover:not(:disabled) {
-    filter: brightness(0.95);
-    transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0px var(--ink);
-  }
-  .btn-primary:active:not(:disabled) {
-    transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0px var(--ink);
-  }
-  /* 핑크 강조 버튼 */
-  .btn-pink {
-    background: var(--pink) !important;
-    border-color: var(--pink) !important;
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
   }
 
-  /* ── 버튼 secondary ── */
+  /* pink override */
+  .btn-pink {
+    background: linear-gradient(to bottom right, #ec4899, #e11d48) !important;
+  }
+
+  /* ── 버튼 secondary (pink gradient) ── */
   .btn-secondary {
-    @apply font-extrabold transition-all duration-150 active:scale-95;
+    @apply font-semibold transition-all duration-200 active:scale-95;
+    @apply bg-gradient-to-br from-pink-500 to-rose-600 text-white rounded-2xl shadow-lg hover:shadow-xl;
     padding: 12px 20px;
     min-height: 44px;
     font-size: 1rem;
-    background: var(--mint);
-    color: var(--ink);
-    border-radius: 99px;
-    border: 2.5px solid var(--ink);
-    box-shadow: 3px 3px 0px var(--ink);
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
   .btn-secondary:hover {
-    background: var(--yellow);
-    transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0px var(--ink);
+    transform: scale(1.02);
   }
 
   /* ── 버튼 ghost ── */
   .btn-ghost {
-    @apply font-bold transition-all duration-150;
+    @apply font-semibold transition-all duration-150;
     padding: 10px 16px;
     min-height: 44px;
     font-size: 0.95rem;
-    color: var(--ink);
-    border-radius: 99px;
-    border: 2px solid var(--ink);
-    background: transparent;
+    color: #6b7280;
+    border-radius: 16px;
+    border: 1.5px solid #e5e7eb;
+    background: white;
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
   .btn-ghost:hover {
-    background: var(--yellow);
+    background: #f3f4f6;
+    border-color: #d1d5db;
   }
 
   /* ── 입력칸 ── */
@@ -118,42 +99,45 @@ body {
     padding-bottom: 13px;
     font-size: 1rem;
     min-height: 48px;
-    background: var(--paper);
-    color: var(--ink);
-    border: 2.5px solid var(--mint);
-    border-radius: 12px;
+    background: #f9fafb;
+    color: #1a1a1a;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 16px;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
   }
-  .input-field::placeholder { color: #aaaaaa; }
+  .input-field::placeholder { color: #9ca3af; }
   .input-field:focus {
-    border-color: var(--pink);
-    box-shadow: 0 0 0 3px rgba(255,153,200,0.25);
+    border-color: #a78bfa;
+    box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.2);
+    background: white;
   }
 
   /* ── 태그 / 뱃지 ── */
   .tag {
-    @apply inline-flex items-center font-bold;
+    @apply inline-flex items-center font-semibold;
     padding: 3px 10px;
     border-radius: 99px;
     font-size: 12px;
     letter-spacing: 0.02em;
-    border: 2px solid currentColor;
   }
 
   /* ── 페이지 타이틀 ── */
   .page-title {
-    @apply text-2xl font-extrabold mb-1;
-    color: var(--ink);
+    @apply text-4xl font-bold mb-1;
+    background: linear-gradient(to right, #9333ea, #ec4899, #9333ea);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     letter-spacing: -0.01em;
   }
 }
 
 /* ── 스크롤바 ── */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--yellow); }
-::-webkit-scrollbar-thumb { background: var(--pink); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: var(--mint); }
+::-webkit-scrollbar-track { background: #f8f7ff; }
+::-webkit-scrollbar-thumb { background: #c4b5fd; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #a78bfa; }
 
 /* ── 애니메이션 ── */
 @keyframes fadeIn {
@@ -179,7 +163,7 @@ body {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--yellow);
-  border: 2.5px solid var(--pink);
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+  background: #f8f7ff;
+  border: 2px solid #c4b5fd;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
 }
