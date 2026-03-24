@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Sparkles } from 'lucide-react'
 
 export default function SetNicknamePage() {
   const router = useRouter()
@@ -73,7 +74,6 @@ export default function SetNicknamePage() {
         setError(data.error || '설정에 실패했어요')
         return
       }
-      localStorage.setItem('tutorial-pending', 'true')
       router.replace('/dashboard')
     } finally {
       setLoading(false)
@@ -81,26 +81,28 @@ export default function SetNicknamePage() {
   }
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: '#fcf6bd' }}
-    >
-      <div className="w-full max-w-md animate-fade-in">
-        <div className="text-center mb-6">
-          <div className="text-5xl mb-3">🐱</div>
-          <h1 className="text-xl font-bold text-gray-800">별명을 정해주세요!</h1>
-          <p className="text-gray-500 text-sm mt-1">
-            다른 유저와 겹치지 않는 별명이에요. 메인에서 &quot;별명 친구 안녕하다냥~&quot; 이렇게 불러줄게요.
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[#f8f7ff]">
+      <div className="w-full max-w-sm animate-fade-in">
+
+        {/* 헤더 */}
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <Sparkles className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent">
+            별명을 정해주세요
+          </h1>
+          <p className="text-gray-500 text-sm mt-1.5 leading-relaxed">
+            리더보드와 커뮤니티에서 사용할<br />나만의 별명이에요
           </p>
         </div>
 
-        <div
-          className="rounded-2xl p-6 border-2 border-[#ff99c8] shadow-[4px_4px_0_0_#ff99c8]"
-          style={{ background: '#fff' }}
-        >
+        {/* 카드 */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-xl p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">별명</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">별명</label>
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -111,20 +113,24 @@ export default function SetNicknamePage() {
                   minLength={2}
                   maxLength={20}
                   disabled={loading}
+                  autoFocus
                 />
                 <button
                   type="button"
                   onClick={handleRandom}
                   disabled={randomLoading || loading}
-                  className="btn-secondary whitespace-nowrap"
+                  className="btn-secondary whitespace-nowrap px-3"
                 >
-                  {randomLoading ? '...' : '🎲 랜덤'}
+                  {randomLoading ? '...' : '🎲'}
                 </button>
               </div>
+              <p className="text-xs text-gray-400 mt-1.5">🎲 버튼을 누르면 랜덤 별명을 추천해 드려요</p>
             </div>
 
             {error && (
-              <div className="text-sm text-red-600 font-medium">😾 {error}</div>
+              <div className="text-sm text-red-500 font-medium bg-red-50 rounded-xl px-3 py-2">
+                {error}
+              </div>
             )}
 
             <button
@@ -132,10 +138,14 @@ export default function SetNicknamePage() {
               disabled={loading || checking || !nickname.trim()}
               className="btn-primary w-full"
             >
-              {loading || checking ? '확인 중...' : '시작하기'}
+              {loading || checking ? '확인 중...' : '시작하기 🚀'}
             </button>
           </form>
         </div>
+
+        <p className="text-center text-xs text-gray-400 mt-4">
+          별명은 나중에 설정에서 변경할 수 있어요
+        </p>
       </div>
     </div>
   )
