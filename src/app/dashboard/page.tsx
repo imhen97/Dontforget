@@ -1,33 +1,11 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
-import KkamnyangiCat from '@/components/KkamnyangiCat'
 import { CAT_ITEMS, CatItem } from '@/lib/catItems'
 import { THEMES, applyTheme } from '@/components/ThemeSelector'
-import { BookOpen, Brain, Target, Flame, Plus } from 'lucide-react'
-
-const CAT_MESSAGES = [
-  '옷 사줘냥 🥶',
-  '퀴즈 안 풀면 삐진다냥 😾',
-  '냥이 배고프다냥 🍜',
-  '같이 공부하자냥 🐾',
-  '오늘 목표 달성 해라냥 💪',
-  '왕관 사줄 냥 없냐냥 👑',
-  '냥이 지켜보고 있다냥 👀',
-  '단어 10개 = 냥 1개냥!',
-  '내일 두 배냥... 지금 해라냥 😤',
-  '꾸준히 해라냥 ✨',
-]
-
-const TUTORIAL_STEPS = [
-  '안녕! 나는 깜빡냥이야 🐾 앱 사용법 알려줄게냥!',
-  '➕ 단어 추가하기 로 영단어를 저장해봐냥!',
-  '✏️ 오늘 복습 퀴즈 로 기억을 강화해냥!',
-  '퀴즈 맞히면 냥 획득! 나 꾸며줄 수 있다냥 🎀',
-  '자, 시작해봐냥! 파이팅이다냥 💪',
-]
+import { BookOpen, Brain, Target, Flame, Plus, Clock } from 'lucide-react'
 
 interface UserData {
   username: string
@@ -46,6 +24,14 @@ interface Stats {
   weeklyActivity: Array<{ date: string; label: string; added: number; quizzed: number }>
 }
 
+interface Word {
+  id: string
+  word: string
+  translation: string
+  type: string
+  createdAt: string
+}
+
 export default function Dashboard() {
   const [user, setUser] = useState<UserData | null>(null)
   const [stats, setStats] = useState<Stats | null>(null)
@@ -57,21 +43,10 @@ export default function Dashboard() {
   const [buying, setBuying] = useState<string | null>(null)
   const [showSettings, setShowSettings] = useState(false)
   const [currentTheme, setCurrentTheme] = useState('cute')
-  const [mascotDisabled, setMascotDisabled] = useState(false)
-  const [catMsg, setCatMsg] = useState('')
-  const [catMsgVisible, setCatMsgVisible] = useState(false)
-  const catMsgTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [tutorialIdx, setTutorialIdx] = useState(-1)
+  const [recentWords, setRecentWords] = useState<Word[]>([])
 
   useEffect(() => {
     setCurrentTheme(localStorage.getItem('theme') ?? 'cute')
-    setMascotDisabled(localStorage.getItem('mascot-disabled') === 'true')
-    if (localStorage.getItem('tutorial-pending') === 'true') {
-      localStorage.removeItem('tutorial-pending')
-      setTutorialIdx(0)
-      setCatMsg(TUTORIAL_STEPS[0])
-      setCatMsgVisible(true)
-    }
   }, [])
 
   const selectTheme = (id: string) => {
@@ -80,51 +55,15 @@ export default function Dashboard() {
     applyTheme(id)
   }
 
-  const toggleMascot = () => {
-    const next = !mascotDisabled
-    setMascotDisabled(next)
-    localStorage.setItem('mascot-disabled', String(next))
-    window.dispatchEvent(new Event('mascot-setting-changed'))
-  }
-
-  const showCatMsg = (msg?: string) => {
-    const m = msg ?? CAT_MESSAGES[Math.floor(Math.random() * CAT_MESSAGES.length)]
-    setCatMsg(m)
-    setCatMsgVisible(true)
-    if (catMsgTimer.current) clearTimeout(catMsgTimer.current)
-    catMsgTimer.current = setTimeout(() => setCatMsgVisible(false), 5000)
-  }
-
-  useEffect(() => {
-    const t = setTimeout(() => showCatMsg(), 1200)
-    return () => clearTimeout(t)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const handleCatClick = () => {
-    if (tutorialIdx >= 0) {
-      const next = tutorialIdx + 1
-      if (next < TUTORIAL_STEPS.length) {
-        setTutorialIdx(next)
-        setCatMsg(TUTORIAL_STEPS[next])
-        setCatMsgVisible(true)
-      } else {
-        setTutorialIdx(-1)
-        setCatMsgVisible(false)
-      }
-      return
-    }
-    if (catMsgVisible) { setCatMsgVisible(false); return }
-    showCatMsg()
-  }
-
   useEffect(() => {
     Promise.all([
       fetch('/api/auth/me').then(r => r.ok ? r.json() : r.json().catch(() => ({}))),
       fetch('/api/stats').then(r => r.ok ? r.json() : r.json().catch(() => ({}))),
-    ]).then(([userData, statsData]) => {
+      fetch('/api/words').then(r => r.ok ? r.json() : r.json().catch(() => ([]))),
+    ]).then(([userData, statsData, wordsData]) => {
       const u = userData as any;
       const s = statsData as any;
+      const w = wordsData as any;
       setUser({
         ...u,
         nyang: u.nyang ?? 0,
@@ -133,6 +72,7 @@ export default function Dashboard() {
       })
       setStats(s)
       setGoalInput(String(u.dailyGoal || 5))
+      setRecentWords((Array.isArray(w) ? w : []).slice(0, 5))
       setLoading(false)
     }).catch(err => {
       console.error('Dashboard fetch error:', err)
@@ -279,43 +219,44 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* 고양이 카드 */}
-        <div className="relative flex flex-col items-center justify-center rounded-3xl border border-gray-200/50 bg-gradient-to-b from-purple-50 to-pink-50 shadow-md"
-          style={{ flex: '1 1 0', minHeight: 120 }}>
-          {/* 우상단 버튼 */}
-          <div className="absolute top-3 right-3 flex gap-1.5">
-            <button
-              onClick={() => setShowShop(true)}
-              className="w-8 h-8 flex items-center justify-center rounded-xl bg-white/80 border border-gray-200/50 shadow-sm hover:shadow-md transition-all text-sm"
-            >
-              🛍️
-            </button>
-            <button
-              onClick={() => setShowSettings(true)}
-              className="w-8 h-8 flex items-center justify-center rounded-xl bg-white/80 border border-gray-200/50 shadow-sm hover:shadow-md transition-all text-sm"
-            >
-              ⚙️
-            </button>
+        {/* 최근 표현 */}
+        <div className="bg-white/70 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-md p-4" style={{ flexShrink: 0 }}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-sm">
+                <Clock className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-sm font-bold text-gray-700">최근 추가한 표현</span>
+            </div>
+            <Link href="/words" className="text-xs font-semibold text-purple-600 hover:text-purple-700 transition-colors">
+              전체 보기 →
+            </Link>
           </div>
 
-          {/* 말풍선 + 고양이 */}
-          <div className="flex flex-col items-center gap-2" style={{ width: '100%' }}>
-            <div style={{ minHeight: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {catMsgVisible && (
-                <div
-                  onClick={() => setCatMsgVisible(false)}
-                  className="bg-white/95 rounded-2xl px-4 py-2 text-sm font-semibold text-gray-700 border border-purple-100 shadow-md cursor-pointer max-w-[220px] text-center"
-                  style={{ animation: 'popIn 0.25s cubic-bezier(0.34,1.56,0.64,1)' }}
-                >
-                  {tutorialIdx >= 0 && <span className="block text-[10px] text-gray-400 mb-1">탭해서 다음 →</span>}
-                  {catMsg}
-                </div>
-              )}
+          {recentWords.length === 0 ? (
+            <div className="text-center py-4">
+              <p className="text-sm text-gray-400">아직 추가한 단어가 없어요</p>
+              <Link href="/words?add=1" className="text-xs font-semibold text-purple-500 hover:text-purple-600 mt-1 inline-block">
+                첫 단어 추가하기 →
+              </Link>
             </div>
-            <button onClick={handleCatClick} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
-              <KkamnyangiCat equippedItems={user?.equippedItems ?? {}} size={110} />
-            </button>
-          </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {recentWords.map((w) => (
+                <div key={w.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-gray-800">{w.word}</span>
+                    <span className="text-xs text-[#6b5b95] font-medium">{w.translation}</span>
+                  </div>
+                  {w.type && w.type !== 'word' && (
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-50 text-purple-500 border border-purple-100">
+                      {w.type}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* 주요 액션 버튼 */}
@@ -385,17 +326,14 @@ export default function Dashboard() {
             <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-t-3xl">
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="font-bold text-white text-lg">🛍️ 깜냥이 옷 가게</h2>
+                  <h2 className="font-bold text-white text-lg">🛍️ 아이템 가게</h2>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20 text-white animate-pulse">
                     매일 업데이트 중
                   </span>
                 </div>
                 <p className="text-xs text-white/80 mt-0.5">내 냥: <strong>{user.nyang}냥</strong></p>
               </div>
-              <div className="flex items-center gap-2">
-                <KkamnyangiCat equippedItems={user.equippedItems} size={60} />
-                <button onClick={() => setShowShop(false)} className="text-white/80 hover:text-white text-xl leading-none">✕</button>
-              </div>
+              <button onClick={() => setShowShop(false)} className="text-white/80 hover:text-white text-xl leading-none">✕</button>
             </div>
 
             {/* Items grid */}
@@ -511,28 +449,6 @@ export default function Dashboard() {
             </div>
 
             <div className="p-5 space-y-6">
-              {/* 깜빡냥이 표시 */}
-              <div>
-                <p className="text-sm font-bold mb-3 text-gray-700">🐱 깜빡냥이</p>
-                <button
-                  onClick={toggleMascot}
-                  className="w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all border border-gray-200 bg-gray-50 hover:bg-gray-100"
-                >
-                  <span className="text-sm font-semibold text-gray-700">응원 깜빡냥이 표시</span>
-                  <div style={{
-                    width: 44, height: 24, borderRadius: 12,
-                    background: mascotDisabled ? '#e5e7eb' : 'linear-gradient(to right, #9333ea, #ec4899)',
-                    position: 'relative', transition: 'background 0.2s', flexShrink: 0,
-                  }}>
-                    <div style={{
-                      position: 'absolute', top: 3, left: mascotDisabled ? 3 : 21,
-                      width: 18, height: 18, borderRadius: '50%', background: '#fff',
-                      boxShadow: '0 1px 4px rgba(0,0,0,0.2)', transition: 'left 0.2s',
-                    }} />
-                  </div>
-                </button>
-              </div>
-
               {/* 테마 선택 */}
               <div>
                 <p className="text-sm font-bold mb-3 text-gray-700">🎨 UI 테마</p>
