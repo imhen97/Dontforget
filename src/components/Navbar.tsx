@@ -4,36 +4,31 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 
 const navItems = [
-  { href: '/dashboard', icon: '🏠', label: '홈' },
-  { href: '/words',     icon: '📖', label: '단어장' },
-  { href: '/review',    icon: '📝', label: '복습장' },
-  { href: '/settings',  icon: '⚙️', label: '설정' },
+  { href: '/dashboard', icon: '🏠', label: '홈',    color: '#ff99c8' },
+  { href: '/words',     icon: '📖', label: '단어장', color: '#e4c1f9' },
+  { href: '/review',    icon: '📝', label: '복습장', color: '#ff99c8' },
+  { href: '/more',      icon: '···', label: '더보기', color: '#e4c1f9' },
 ]
 
-const DapdapiSvg = ({ size = 28 }: { size?: number }) => (
+const CatSvg = ({ size = 28 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 64 64" fill="none">
-    {/* Hair spikes */}
-    <polygon points="14,24 18,10 25,25" fill="#1a2a1e"/>
-    <polygon points="24,19 28,5 33,19" fill="#1a2a1e"/>
-    <polygon points="32,19 37,5 41,19" fill="#1a2a1e"/>
-    <polygon points="40,25 47,10 51,24" fill="#1a2a1e"/>
-    {/* Head */}
-    <circle cx="32" cy="34" r="21" fill="#9CFFD9"/>
-    {/* Eyebrows (furrowed) */}
-    <line x1="17" y1="26" x2="26" y2="29" stroke="#1a2a1e" strokeWidth="2.5" strokeLinecap="round"/>
-    <line x1="38" y1="29" x2="47" y2="26" stroke="#1a2a1e" strokeWidth="2.5" strokeLinecap="round"/>
-    {/* Eyes */}
-    <circle cx="24" cy="34" r="5.5" fill="#1a2a1e"/>
-    <circle cx="40" cy="34" r="5.5" fill="#1a2a1e"/>
-    <circle cx="25.5" cy="32" r="2" fill="#9CFFD9"/>
-    <circle cx="41.5" cy="32" r="2" fill="#9CFFD9"/>
-    {/* Cheeks */}
-    <circle cx="12" cy="38" r="5" fill="#1a2a1e" opacity="0.15"/>
-    <circle cx="52" cy="38" r="5" fill="#1a2a1e" opacity="0.15"/>
-    {/* Nose */}
-    <ellipse cx="32" cy="40" rx="2.2" ry="1.6" fill="#1a2a1e" opacity="0.4"/>
-    {/* Mouth (grimace) */}
-    <path d="M27 45 Q32 42 37 45" stroke="#1a2a1e" strokeWidth="2" fill="none" strokeLinecap="round"/>
+    <polygon points="8,28 18,8 26,26"   fill="#1a1a1a" />
+    <polygon points="38,26 46,8 56,28"  fill="#1a1a1a" />
+    <polygon points="11,26 18,12 24,25" fill="#ff99c8" />
+    <polygon points="40,25 46,12 53,26" fill="#ff99c8" />
+    <ellipse cx="32" cy="36" rx="22" ry="20" fill="#1a1a1a" />
+    <ellipse cx="24" cy="32" rx="5"  ry="5.5"  fill="#fff" />
+    <ellipse cx="40" cy="32" rx="5"  ry="5.5"  fill="#fff" />
+    <ellipse cx="24.5" cy="32.5" rx="3" ry="3.5" fill="#3a3038" />
+    <ellipse cx="40.5" cy="32.5" rx="3" ry="3.5" fill="#3a3038" />
+    <circle cx="26" cy="31" r="1.2" fill="#fff" />
+    <circle cx="42" cy="31" r="1.2" fill="#fff" />
+    <ellipse cx="32" cy="40" rx="2.5" ry="1.8" fill="#ff99c8" />
+    <path d="M29.5 42 Q32 45 34.5 42" stroke="#7a6e78" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+    <line x1="10" y1="39" x2="27" y2="41" stroke="#7a6e78" strokeWidth="1" strokeLinecap="round"/>
+    <line x1="10" y1="42" x2="27" y2="42.5" stroke="#7a6e78" strokeWidth="1" strokeLinecap="round"/>
+    <line x1="37" y1="41" x2="54" y2="39" stroke="#7a6e78" strokeWidth="1" strokeLinecap="round"/>
+    <line x1="37" y1="42.5" x2="54" y2="42" stroke="#7a6e78" strokeWidth="1" strokeLinecap="round"/>
   </svg>
 )
 
@@ -52,25 +47,20 @@ export default function Navbar() {
       <header
         className="hidden md:flex fixed top-0 left-0 right-0 z-50 h-14 items-center px-5 justify-between"
         style={{
-          background: '#9CFFD9',
-          borderBottom: '2.5px solid #1a2a1e',
-          boxShadow: '0 3px 0px rgba(26,42,30,0.1)',
+          background: 'var(--yellow)',
+          borderBottom: '2.5px solid var(--pink)',
+          boxShadow: '0 3px 0px rgba(58,48,56,0.07)',
         }}
       >
-        {/* 스프링 구멍 */}
         <div className="flex items-center gap-1.5 mr-4">
           {[0,1,2].map(i => <div key={i} className="notebook-hole" />)}
         </div>
-
-        {/* 로고 */}
         <Link href="/dashboard" className="flex items-center gap-2 select-none mr-6">
-          <DapdapiSvg size={30} />
-          <span style={{ fontSize: '1.15rem', fontWeight: 800, color: '#1a2a1e', letterSpacing: '0.01em' }}>
-            답답노트
+          <CatSvg size={30} />
+          <span style={{ fontSize: '1.15rem', fontWeight: 800, color: '#3a3038', letterSpacing: '0.01em' }}>
+            깜빡 노트
           </span>
         </Link>
-
-        {/* 네비 탭 */}
         <nav className="flex items-end gap-1 flex-1">
           {navItems.map(item => {
             const active = pathname.startsWith(item.href)
@@ -80,14 +70,13 @@ export default function Navbar() {
                 style={{
                   fontWeight: active ? 800 : 600,
                   borderRadius: '10px 10px 0 0',
-                  background: active ? '#9CFFD9' : 'transparent',
-                  color: active ? '#1a2a1e' : '#5a7a60',
-                  border: active ? '2.5px solid #1a2a1e' : '2.5px solid transparent',
-                  borderBottom: active ? '2.5px solid #9CFFD9' : '2.5px solid #9CFFD9',
+                  background: active ? item.color : 'transparent',
+                  color: active ? '#3a3038' : '#b8adb6',
+                  border: active ? '2.5px solid #e8e0e6' : '2.5px solid transparent',
+                  borderBottom: active ? `2.5px solid ${item.color}` : '2.5px solid transparent',
                   marginBottom: active ? '-2.5px' : '0',
                   padding: active ? '6px 14px 10px' : '6px 14px',
                   fontSize: '0.88rem',
-                  boxShadow: active ? '0 -2px 6px rgba(26,42,30,0.08)' : 'none',
                 }}
               >
                 <span>{item.icon}</span>
@@ -96,35 +85,30 @@ export default function Navbar() {
             )
           })}
         </nav>
-
         <button onClick={handleLogout} className="btn-ghost ml-4">로그아웃</button>
       </header>
 
       {/* ── 모바일 하단 탭 ── */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around px-1 h-16"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex items-stretch justify-around h-[52px]"
         style={{
-          background: '#9CFFD9',
-          borderTop: '2.5px solid #1a2a1e',
-          boxShadow: '0 -3px 0px rgba(26,42,30,0.08)',
+          background: 'var(--yellow)',
+          borderTop: '2.5px solid var(--pink)',
+          boxShadow: '0 -3px 0px rgba(58,48,56,0.05)',
         }}
       >
         {navItems.map(item => {
           const active = pathname.startsWith(item.href)
           return (
             <Link key={item.href} href={item.href}
-              className="flex flex-col items-center gap-0.5 px-2 transition-all duration-150"
+              className="flex flex-col items-center justify-center flex-1 transition-all duration-150 gap-0.5"
               style={{
-                paddingTop: active ? '4px' : '7px',
-                paddingBottom: '4px',
-                background: active ? '#9CFFD9' : 'transparent',
-                borderRadius: active ? '12px' : '0',
-                color: active ? '#1a2a1e' : '#5a7a60',
-                minWidth: 44,
+                background: active ? item.color : 'transparent',
+                color: active ? '#3a3038' : '#b8adb6',
               }}
             >
-              <span className="text-xl">{item.icon}</span>
-              <span style={{ fontSize: '10px', fontWeight: active ? 800 : 500 }}>{item.label}</span>
+              <span style={{ fontSize: '18px', lineHeight: 1 }}>{item.icon}</span>
+              <span style={{ fontSize: '10px', fontWeight: active ? 800 : 600 }}>{item.label}</span>
             </Link>
           )
         })}

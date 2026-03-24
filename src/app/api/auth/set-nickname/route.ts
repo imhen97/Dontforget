@@ -1,3 +1,4 @@
+export const runtime = 'edge'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/auth'
 import { prisma } from '@/lib/db'
@@ -44,7 +45,7 @@ export async function POST(req: NextRequest) {
   const authUser = await getAuthUser()
   if (!authUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const body = await req.json()
+  const body = await req.json() as any
   const nickname = (body.nickname ?? '').trim()
 
   if (!nickname) {

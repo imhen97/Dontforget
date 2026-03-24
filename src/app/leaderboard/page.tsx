@@ -26,8 +26,8 @@ const LEVEL_EMOJI: Record<string, string> = {
 
 const RANK_STYLES: Record<number, { background: string; borderColor: string }> = {
   1: { background: '#fcf6bd', borderColor: '#ff99c8' },
-  2: { background: '#a9def9', borderColor: '#a9def9' },
-  3: { background: '#d0f4de', borderColor: '#d0f4de' },
+  2: { background: '#e4c1f9', borderColor: '#e4c1f9' },
+  3: { background: '#e4c1f9', borderColor: '#e4c1f9' },
 }
 
 export default function LeaderboardPage() {
@@ -38,7 +38,7 @@ export default function LeaderboardPage() {
   useEffect(() => {
     fetch('/api/leaderboard')
       .then(r => r.json())
-      .then(data => {
+      .then((data: any) => {
         setLeaderboard(data.leaderboard || [])
         setMyRank(data.myRank || null)
         setLoading(false)
@@ -102,7 +102,7 @@ export default function LeaderboardPage() {
                   <div
                     className={`${heights[podiumIdx]} w-full rounded-t-xl flex items-start pt-2 justify-center text-xs font-bold`}
                     style={{
-                      background: podiumIdx === 1 ? '#fcf6bd' : podiumIdx === 0 ? '#a9def9' : '#d0f4de',
+                      background: podiumIdx === 1 ? '#fcf6bd' : podiumIdx === 0 ? '#e4c1f9' : '#e4c1f9',
                       color: '#1a1a1a',
                       border: '2px solid rgba(0,0,0,0.1)',
                     }}
@@ -126,7 +126,7 @@ export default function LeaderboardPage() {
               <div
                 className="w-9 h-9 flex items-center justify-center rounded-xl font-bold text-sm flex-shrink-0"
                 style={{
-                  background: user.rank === 1 ? '#fcf6bd' : user.rank === 2 ? '#a9def9' : user.rank === 3 ? '#d0f4de' : '#ff99c8',
+                  background: user.rank === 1 ? '#fcf6bd' : user.rank === 2 ? '#e4c1f9' : user.rank === 3 ? '#e4c1f9' : '#ff99c8',
                   color: '#1a1a1a',
                 }}
               >

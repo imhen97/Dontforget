@@ -18,7 +18,7 @@ type QuizMode = 'menu' | 'quiz' | 'result'
 const QUIZ_TYPES = [
   { id: 'daily', icon: '📅', title: '오늘의 복습', desc: 'Anki 방식 - 복습 예정 단어', bg: '#ff99c8' },
   { id: 'weekly_wrong', icon: '❌', title: '틀린 문제 모음', desc: '최근 1주일 오답 단어', bg: '#e4c1f9' },
-  { id: 'random', icon: '🎲', title: '랜덤 퀴즈', desc: '전체 단어 중 랜덤', bg: '#a9def9' },
+  { id: 'random', icon: '🎲', title: '랜덤 퀴즈', desc: '전체 단어 중 랜덤', bg: '#e4c1f9' },
 ]
 
 export default function QuizPage() {
@@ -44,8 +44,8 @@ export default function QuizPage() {
 
       if (type === 'daily') {
         const [dailyRes, sessionRes] = await Promise.all([
-          fetch('/api/quiz/daily').then(r => r.json()),
-          fetch('/api/quiz/extra').then(r => r.json()),
+          fetch('/api/quiz/daily').then(r => r.json() as Promise<{ questions: QuizQuestion[], message?: string }>),
+          fetch('/api/quiz/extra').then(r => r.json() as Promise<{ sessionId: string }>),
         ])
 
         if (!dailyRes.questions?.length) {
@@ -61,7 +61,7 @@ export default function QuizPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ type }),
         })
-        const data = await res.json()
+        const data = await res.json() as { questions: QuizQuestion[], sessionId: string, message?: string }
 
         if (!data.questions?.length) {
           alert(data.message || '퀴즈할 단어가 없어요.')
@@ -203,7 +203,7 @@ export default function QuizPage() {
                 <div
                   key={i}
                   className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold"
-                  style={{ background: correct ? '#d0f4de' : '#ff99c8', color: '#1a1a1a' }}
+                  style={{ background: correct ? '#e4c1f9' : '#ff99c8', color: '#1a1a1a' }}
                 >
                   {correct ? '✓' : '✗'}
                 </div>
@@ -265,11 +265,11 @@ export default function QuizPage() {
         <div className="grid grid-cols-2 gap-3">
           {current.choices.map((choice, i) => {
             let bgColor = '#fff'
-            let borderColor = '#a9def9'
+            let borderColor = '#e4c1f9'
             let textColor = '#1a1a1a'
             let extraClass = 'hover:border-[#ff99c8]'
             if (showAnswer) {
-              if (i === current.correctIndex) { bgColor = '#d0f4de'; borderColor = '#d0f4de'; extraClass = 'font-semibold' }
+              if (i === current.correctIndex) { bgColor = '#e4c1f9'; borderColor = '#e4c1f9'; extraClass = 'font-semibold' }
               else if (i === selected && i !== current.correctIndex) { bgColor = '#ff99c8'; borderColor = '#ff99c8' }
               else { bgColor = '#fcf6bd'; borderColor = '#fcf6bd'; textColor = '#888' }
             } else if (selected === i) {
@@ -295,7 +295,7 @@ export default function QuizPage() {
           <div className="mt-4 animate-fade-in">
             <div
               className="card text-center mb-4"
-              style={selected === current.correctIndex ? { background: '#d0f4de', borderColor: '#d0f4de' } : { background: '#ff99c8', borderColor: '#ff99c8' }}
+              style={selected === current.correctIndex ? { background: '#e4c1f9', borderColor: '#e4c1f9' } : { background: '#ff99c8', borderColor: '#ff99c8' }}
             >
               <div className="text-2xl mb-1">{selected === current.correctIndex ? '🎉' : '😅'}</div>
               <div className="font-semibold" style={{ color: '#1a1a1a' }}>

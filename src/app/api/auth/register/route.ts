@@ -1,3 +1,4 @@
+export const runtime = 'edge'
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/db'
@@ -5,7 +6,7 @@ import { signToken } from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password } = await req.json()
+    const { email, password } = await req.json() as any
 
     if (!email || !password) {
       return NextResponse.json({ error: '이메일과 비밀번호를 입력해주세요' }, { status: 400 })
@@ -24,8 +25,9 @@ export async function POST(req: NextRequest) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 12)
-    const { randomBytes } = await import('crypto')
-    const tempUsername = `u_${randomBytes(8).toString('hex')}`
+    const arr = new Uint8Array(8)
+    crypto.getRandomValues(arr)
+    const tempUsername = `u_${Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('')}`
 
     const user = await prisma.user.create({
       data: { email, username: tempUsername, password: hashedPassword, nicknameSet: false },

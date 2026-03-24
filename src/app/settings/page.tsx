@@ -31,7 +31,7 @@ export default function SettingsPage() {
   useEffect(() => {
     fetch('/api/auth/me', { credentials: 'include' })
       .then(r => r.ok ? r.json() : null)
-      .then(data => {
+      .then((data: any) => {
         if (!data) {
           router.replace('/')
           return
@@ -49,7 +49,7 @@ export default function SettingsPage() {
     setNicknameError('')
     try {
       const res = await fetch('/api/auth/set-nickname', { method: 'PUT' })
-      const data = await res.json()
+      const data: any = await res.json()
       if (data.nickname) setNickname(data.nickname)
     } finally {
       setNicknameRandomLoading(false)
@@ -71,7 +71,7 @@ export default function SettingsPage() {
     if (trimmed === user?.username) return
 
     const checkRes = await fetch(`/api/auth/set-nickname?nickname=${encodeURIComponent(trimmed)}`)
-    const checkData = await checkRes.json()
+    const checkData: any = await checkRes.json()
     if (!checkData.available) {
       setNicknameError('이미 사용 중인 별명이에요')
       return
@@ -85,11 +85,11 @@ export default function SettingsPage() {
         body: JSON.stringify({ nickname: trimmed }),
       })
       if (!res.ok) {
-        const data = await res.json()
+        const data: any = await res.json()
         setNicknameError(data.error || '변경에 실패했어요')
         return
       }
-      const data = await res.json()
+      const data: any = await res.json()
       setUser(prev => prev ? { ...prev, username: data.username } : null)
     } finally {
       setNicknameSaving(false)
@@ -107,7 +107,7 @@ export default function SettingsPage() {
         body: JSON.stringify({ dailyGoal: num }),
       })
       if (res.ok) {
-        const data = await res.json()
+        const data: any = await res.json()
         setUser(prev => prev ? { ...prev, dailyGoal: data.dailyGoal } : null)
       }
     } finally {
@@ -251,7 +251,7 @@ function PasswordChangeForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentPassword, newPassword }),
       })
-      const data = await res.json()
+      const data: any = await res.json()
       if (!res.ok) {
         setError(data.error || '비밀번호 변경에 실패했어요')
         return

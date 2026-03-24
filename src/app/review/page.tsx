@@ -33,6 +33,12 @@ export default function ReviewPage() {
   const [quizShowAnswer, setQuizShowAnswer] = useState(false)
   const [quizScore, setQuizScore] = useState(0)
   const [quizAnswers, setQuizAnswers] = useState<boolean[]>([])
+  const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
+
+  const showToast = (msg: string, ok = true) => {
+    setToast({ msg, ok })
+    setTimeout(() => setToast(null), 2500)
+  }
 
   const fetchNotes = () => {
     setLoading(true)
@@ -103,7 +109,7 @@ export default function ReviewPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: form.content }),
       })
-      const data = await res.json()
+      const data: any = await res.json()
       if (data.title) setForm((f) => ({ ...f, title: data.title }))
     } catch {
       alert('제목 추천을 불러오지 못했어요.')
@@ -124,7 +130,7 @@ export default function ReviewPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: form.content }),
       })
-      const data = await res.json()
+      const data: any = await res.json()
       if (data.summary) setForm((f) => ({ ...f, summary: data.summary }))
     } catch {
       alert('요약을 불러오지 못했어요.')
@@ -156,7 +162,7 @@ export default function ReviewPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editingId ? { noteId: editingId } : { content }),
       })
-      const data = await res.json()
+      const data: any = await res.json()
       if (!data.questions?.length) {
         alert('퀴즈를 만들 수 있는 내용이 부족해요. 조금 더 적어주세요!')
         return
@@ -201,10 +207,7 @@ export default function ReviewPage() {
         <Navbar />
         <main className="max-w-2xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="page-title">📝 복습장</h1>
-              <p className="text-gray-500 text-sm">그날그날 새로 알게 된 걸 적고, AI로 정리해보라냥!</p>
-            </div>
+            <p className="text-gray-500 text-sm">총 {notes.length}개 메모</p>
             <button onClick={openNew} className="btn-primary flex items-center gap-1.5">
               <span>✏️</span> 새 메모
             </button>
@@ -314,7 +317,7 @@ export default function ReviewPage() {
             </div>
 
             {form.summary && (
-              <div className="rounded-xl p-4 border-2 border-[#d0f4de] bg-[#f0fdf4]">
+              <div className="rounded-xl p-4 border-2 border-[#e4c1f9] bg-[#f0fdf4]">
                 <div className="text-xs font-bold text-gray-600 mb-2">📋 AI 요약</div>
                 <p className="text-sm text-gray-800 whitespace-pre-wrap">{form.summary}</p>
                 {editingId && (
@@ -353,7 +356,7 @@ export default function ReviewPage() {
         <Navbar />
         <main className="max-w-md mx-auto px-4 py-6">
           <div className="flex items-center gap-3 mb-6">
-            <button onClick={() => setView('editor')} className="hover:opacity-70 font-bold" style={{ color: '#1a1a1a' }}>
+            <button onClick={() => setView('editor')} className="hover:opacity-70 font-bold" style={{ color: 'var(--ink)' }}>
               ←
             </button>
             <div className="flex-1">
@@ -361,17 +364,17 @@ export default function ReviewPage() {
                 <span>{quizIdx + 1} / {quizQuestions.length}</span>
                 <span>맞힌 개수: {quizScore}</span>
               </div>
-              <div className="w-full rounded-full h-2" style={{ background: '#e4c1f9' }}>
+              <div className="w-full rounded-full h-2" style={{ background: 'var(--purple)' }}>
                 <div
                   className="h-2 rounded-full transition-all"
-                  style={{ width: `${progress}%`, background: '#ff99c8' }}
+                  style={{ width: `${progress}%`, background: 'var(--pink)' }}
                 />
               </div>
             </div>
           </div>
 
           <div className="card mb-4 text-center">
-            <div className="text-xs font-bold mb-3 px-3 py-1 rounded-full inline-block" style={{ background: '#d0f4de', color: '#1a1a1a' }}>
+            <div className="text-xs font-bold mb-3 px-3 py-1 rounded-full inline-block" style={{ background: 'var(--purple)', color: 'var(--ink)' }}>
               복습 퀴즈
             </div>
             <div className="text-lg font-bold text-gray-800 mb-4 leading-snug">{current.question}</div>
@@ -380,11 +383,11 @@ export default function ReviewPage() {
           <div className="grid grid-cols-2 gap-3">
             {current.choices.map((choice, i) => {
               let bg = '#fff'
-              let border = '#a9def9'
+              let border = '#e4c1f9'
               if (quizShowAnswer) {
                 if (i === current.correctIndex) {
-                  bg = '#d0f4de'
-                  border = '#d0f4de'
+                  bg = '#e4c1f9'
+                  border = '#e4c1f9'
                 } else if (i === quizSelected && i !== current.correctIndex) {
                   bg = '#ff99c8'
                   border = '#ff99c8'
@@ -402,7 +405,7 @@ export default function ReviewPage() {
                   onClick={() => handleQuizAnswer(i)}
                   disabled={quizShowAnswer}
                   className="rounded-xl p-3 text-sm text-center transition-all active:scale-95 min-h-[56px] flex items-center justify-center"
-                  style={{ background: bg, border: `2px solid ${border}`, color: '#1a1a1a' }}
+                  style={{ background: bg, border: `2px solid ${border}`, color: 'var(--ink)' }}
                 >
                   {choice}
                 </button>
@@ -416,14 +419,14 @@ export default function ReviewPage() {
                 className="card text-center mb-4"
                 style={
                   quizSelected === current.correctIndex
-                    ? { background: '#d0f4de', borderColor: '#d0f4de' }
-                    : { background: '#ff99c8', borderColor: '#ff99c8' }
+                    ? { background: 'var(--purple)', borderColor: '#e4c1f9' }
+                    : { background: 'var(--pink)', borderColor: '#ff99c8' }
                 }
               >
                 <div className="text-2xl mb-1">
                   {quizSelected === current.correctIndex ? '🎉' : '😅'}
                 </div>
-                <div className="font-semibold" style={{ color: '#1a1a1a' }}>
+                <div className="font-semibold" style={{ color: 'var(--ink)' }}>
                   {quizSelected === current.correctIndex
                     ? '정답!'
                     : `정답: ${current.choices[current.correctIndex]}`}
@@ -456,14 +459,14 @@ export default function ReviewPage() {
             <p className="text-gray-500 text-sm mb-6">복습 퀴즈가 끝났어요.</p>
 
             <div className="card mb-6">
-              <div className="text-4xl font-bold mb-1" style={{ color: '#1a1a1a' }}>
+              <div className="text-4xl font-bold mb-1" style={{ color: 'var(--ink)' }}>
                 {quizScore} / {total}
               </div>
               <div className="text-sm text-gray-500">정답률 {pct}%</div>
               <div className="w-full rounded-full h-3 mt-4 bg-[#e4c1f9]">
                 <div
                   className="h-3 rounded-full transition-all duration-1000"
-                  style={{ width: `${pct}%`, background: '#ff99c8' }}
+                  style={{ width: `${pct}%`, background: 'var(--pink)' }}
                 />
               </div>
             </div>
@@ -473,7 +476,7 @@ export default function ReviewPage() {
                 <div
                   key={i}
                   className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold"
-                  style={{ background: correct ? '#d0f4de' : '#ff99c8', color: '#1a1a1a' }}
+                  style={{ background: correct ? '#e4c1f9' : '#ff99c8', color: 'var(--ink)' }}
                 >
                   {correct ? '✓' : '✗'}
                 </div>

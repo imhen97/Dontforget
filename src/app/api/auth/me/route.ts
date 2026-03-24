@@ -1,3 +1,4 @@
+export const runtime = 'edge'
 
 import { NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/auth'
@@ -87,7 +88,7 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const body = await req.json().catch(() => ({}))
+  const body = await (req.json() as any).catch(() => ({}))
   const { dailyGoal, customTopics: customTopicsRaw } = body
 
   const data: { dailyGoal?: number; customTopics?: string } = {}

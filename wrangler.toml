@@ -1,4 +1,10 @@
 name = "dontforget"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = ".vercel/output/static"
+# next-on-pages 빌드 결과물 전체 (static + worker)
+pages_build_output_dir = ".vercel/output"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "dontforget-db"
+database_id = "e2e5bea3-1473-4240-a315-8627a7b25dc8"

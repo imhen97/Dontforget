@@ -28,11 +28,22 @@ GitHub 로그인/토큰 요구 시:
 
 ---
 
-## 3. 실제 사이트/앱 배포: Vercel (권장)
+## 3. 실제 사이트/앱 배포
+
+### 3-A. Cloudflare Pages (권장)
+
+이 프로젝트는 **Cloudflare Pages** 배포용으로 설정되어 있습니다.
+
+- **상세 절차**: **[DEPLOY_CLOUDFLARE.md](./DEPLOY_CLOUDFLARE.md)** 참고
+- **한 줄 요약**:  
+  - 로컬 배포: `npm run pages:build` 후 `npm run deploy`  
+  - 자동 배포: Cloudflare 대시보드에서 GitHub 저장소 연결 → Build command: `npm run pages:build`, Build output: `.vercel/output`
+
+### 3-B. Vercel (대안)
 
 **Vercel**은 Next.js를 그대로 지원하고, 무료 플랜으로 배포할 수 있습니다.
 
-### 3-1. Vercel 연결
+**Vercel 연결**
 
 1. [vercel.com](https://vercel.com) 가입 후 로그인
 2. **Add New** → **Project**
@@ -42,7 +53,7 @@ GitHub 로그인/토큰 요구 시:
 
 첫 배포는 실패할 수 있습니다. **환경 변수**와 **DB** 설정이 필요하기 때문입니다.
 
-### 3-2. 환경 변수 설정 (Vercel 대시보드)
+**환경 변수 설정** (Vercel 대시보드)
 
 프로젝트 → **Settings** → **Environment Variables**에서 아래를 추가하세요.
 
@@ -58,7 +69,7 @@ GitHub 로그인/토큰 요구 시:
 | `KAKAO_CLIENT_SECRET` | (로컬 .env 와 동일) | 카카오 개발자 콘솔에서 확인 |
 | `OPENAI_API_KEY` | (선택) AI 예문/번역용 | 없으면 해당 기능만 비활성화 |
 
-### 3-3. 프로덕션 DB (필수)
+**프로덕션 DB** (필수)
 
 로컬의 `file:./dev.db`는 Vercel에 없으므로 **외부 DB**가 필요합니다.
 
@@ -69,7 +80,7 @@ GitHub 로그인/토큰 요구 시:
 
 지금은 **SQLite**이므로, PostgreSQL로 바꾸면 `prisma/schema.prisma` 의 `datasource`와 `provider` 수정이 필요합니다. 원하면 그 단계도 정리해 드릴 수 있습니다.
 
-### 3-4. OAuth 리다이렉트 URI 등록
+**OAuth 리다이렉트 URI 등록**
 
 배포된 URL(예: `https://xxx.vercel.app`)을 다음에 등록하세요.
 
@@ -85,7 +96,7 @@ GitHub 로그인/토큰 요구 시:
 ## 요약
 
 1. **푸시**: 위 1번처럼 `git push` 만 로컬에서 실행
-2. **배포**: GitHub Pages 대신 **Vercel** 에서 이 저장소 연결 후 배포
-3. **동작을 위해**: Vercel 환경 변수 + 프로덕션 DB + OAuth 리다이렉트 URI 설정
+2. **배포**: **Cloudflare Pages** → [DEPLOY_CLOUDFLARE.md](./DEPLOY_CLOUDFLARE.md) 참고 (또는 Vercel 사용 가능)
+3. **동작을 위해**: 환경 변수 + 프로덕션 DB + OAuth 리다이렉트 URI 설정
 
-DB를 PostgreSQL(Neon 등)으로 바꾸는 작업이 필요하면 말해 주세요.
+DB를 PostgreSQL(Neon) 또는 D1로 바꾸는 작업이 필요하면 말해 주세요.

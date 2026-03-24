@@ -36,14 +36,14 @@ export default function CommunityPage() {
   useEffect(() => {
     setLoading(true)
     fetch(`/api/community?category=${category}`)
-      .then(r => r.json())
-      .then(data => { setPosts(Array.isArray(data) ? data : []); setLoading(false) })
+      .then(r => r.json() as Promise<Post[]>)
+      .then((data: any) => { setPosts(Array.isArray(data) ? data : []); setLoading(false) })
   }, [category])
 
   const handleLike = async (postId: string, e: React.MouseEvent) => {
     e.preventDefault()
     const res = await fetch(`/api/community/${postId}/like`, { method: 'POST' })
-    const data = await res.json()
+    const data = await res.json() as { liked: boolean }
     setPosts(prev => prev.map(p =>
       p.id === postId
         ? { ...p, liked: data.liked, likeCount: p.likeCount + (data.liked ? 1 : -1) }
@@ -68,7 +68,7 @@ export default function CommunityPage() {
         body: JSON.stringify(newPost),
       })
       if (res.ok) {
-        const post = await res.json()
+        const post = await res.json() as Post
         setPosts(prev => [post, ...prev])
         setNewPost({ title: '', content: '', category: 'general' })
         setShowNewPost(false)
@@ -79,7 +79,7 @@ export default function CommunityPage() {
   }
 
   const CATEGORY_COLORS: Record<string, { background: string; color: string }> = {
-    study_tips: { background: '#a9def9', color: '#1a1a1a' },
+    study_tips: { background: '#e4c1f9', color: '#1a1a1a' },
     word_debate: { background: '#fcf6bd', color: '#1a1a1a' },
     general: { background: '#e4c1f9', color: '#1a1a1a' },
   }

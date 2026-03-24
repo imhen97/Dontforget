@@ -1,3 +1,4 @@
+export const runtime = 'edge'
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/db'
@@ -5,7 +6,7 @@ import { signToken } from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password } = await req.json()
+    const { email, password } = await req.json() as any
 
     if (!email || !password) {
       return NextResponse.json({ error: '이메일과 비밀번호를 입력해주세요' }, { status: 400 })

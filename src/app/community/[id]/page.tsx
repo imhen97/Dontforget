@@ -1,5 +1,7 @@
 'use client'
 
+export const runtime = 'edge'
+
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
@@ -34,14 +36,14 @@ export default function PostDetailPage() {
 
   useEffect(() => {
     fetch(`/api/community/${params.id}`)
-      .then(r => r.json())
-      .then(data => { setPost(data); setLoading(false) })
+      .then(r => r.json() as Promise<PostDetail>)
+      .then((data: any) => { setPost(data); setLoading(false) })
   }, [params.id])
 
   const handleLike = async () => {
     if (!post) return
     const res = await fetch(`/api/community/${post.id}/like`, { method: 'POST' })
-    const data = await res.json()
+    const data = await res.json() as { liked: boolean }
     setPost(p => p ? {
       ...p,
       liked: data.liked,
@@ -61,7 +63,7 @@ export default function PostDetailPage() {
     })
 
     if (res.ok) {
-      const comment = await res.json()
+      const comment = await res.json() as Comment
       setPost(p => p ? { ...p, comments: [...p.comments, comment] } : null)
       setCommentText('')
     }

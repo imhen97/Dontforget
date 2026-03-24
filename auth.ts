@@ -36,8 +36,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const email = user.email!
         const existing = await prisma.user.findUnique({ where: { email } })
         if (!existing) {
-          const { randomBytes } = await import('crypto')
-          const tempUsername = `u_${randomBytes(8).toString('hex')}`
+          const arr = new Uint8Array(8)
+          crypto.getRandomValues(arr)
+          const tempUsername = `u_${Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('')}`
           const created = await prisma.user.create({
             data: { email, username: tempUsername, password: null, nicknameSet: false },
           })

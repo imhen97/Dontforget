@@ -1,3 +1,4 @@
+export const runtime = 'edge'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUserFromRequest } from '@/lib/auth'
 import { prisma } from '@/lib/db'
@@ -10,7 +11,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const note = await prisma.reviewNote.findFirst({ where: { id, userId: authUser.userId } })
   if (!note) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  const data = await req.json()
+  const data = await req.json() as any
   const updated = await prisma.reviewNote.update({
     where: { id },
     data: {

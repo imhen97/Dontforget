@@ -14,7 +14,7 @@ export default function SetNicknamePage() {
   useEffect(() => {
     fetch('/api/auth/me')
       .then(r => r.ok ? r.json() : null)
-      .then(data => {
+      .then((data: any) => {
         if (!data) {
           router.replace('/')
           return
@@ -31,7 +31,7 @@ export default function SetNicknamePage() {
     setError('')
     try {
       const res = await fetch('/api/auth/set-nickname', { method: 'PUT' })
-      const data = await res.json()
+      const data: any = await res.json()
       if (data.nickname) setNickname(data.nickname)
     } finally {
       setRandomLoading(false)
@@ -53,7 +53,7 @@ export default function SetNicknamePage() {
 
     setChecking(true)
     const checkRes = await fetch(`/api/auth/set-nickname?nickname=${encodeURIComponent(trimmed)}`)
-    const checkData = await checkRes.json()
+    const checkData: any = await checkRes.json()
     setChecking(false)
 
     if (!checkData.available) {
@@ -68,11 +68,12 @@ export default function SetNicknamePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nickname: trimmed }),
       })
-      const data = await res.json()
+      const data: any = await res.json()
       if (!res.ok) {
         setError(data.error || '설정에 실패했어요')
         return
       }
+      localStorage.setItem('tutorial-pending', 'true')
       router.replace('/dashboard')
     } finally {
       setLoading(false)

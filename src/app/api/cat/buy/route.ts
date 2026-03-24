@@ -1,3 +1,4 @@
+export const runtime = 'edge'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/auth'
 import { prisma } from '@/lib/db'
@@ -7,7 +8,7 @@ export async function POST(req: NextRequest) {
   const authUser = await getAuthUser()
   if (!authUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { itemId } = await req.json()
+  const { itemId } = await req.json() as any
   const item = ITEM_MAP.get(itemId)
   if (!item) return NextResponse.json({ error: '존재하지 않는 아이템이에요' }, { status: 400 })
 

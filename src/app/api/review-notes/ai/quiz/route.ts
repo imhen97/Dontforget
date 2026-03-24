@@ -1,3 +1,4 @@
+export const runtime = 'edge'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUserFromRequest } from '@/lib/auth'
 import { generateQuizFromNote } from '@/lib/ai'
@@ -7,7 +8,7 @@ export async function POST(req: NextRequest) {
   const authUser = await getAuthUserFromRequest(req)
   if (!authUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const body = await req.json()
+  const body = await req.json() as any
   let content: string
   if (body.noteId) {
     const note = await prisma.reviewNote.findFirst({

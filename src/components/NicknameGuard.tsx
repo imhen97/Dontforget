@@ -12,7 +12,7 @@ export default function NicknameGuard() {
 
     fetch('/api/auth/me')
       .then(r => r.ok ? r.json() : null)
-      .then(data => {
+      .then((data: any) => {
         if (data && data.nicknameSet === false) {
           router.replace('/set-nickname')
         }

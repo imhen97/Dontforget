@@ -1,3 +1,4 @@
+export const runtime = 'edge'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUserFromRequest } from '@/lib/auth'
@@ -8,7 +9,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!authUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id: postId } = await params
-  const { content } = await req.json()
+  const { content } = await req.json() as any
 
   if (!content) {
     return NextResponse.json({ error: '댓글 내용을 입력해주세요' }, { status: 400 })

@@ -22,8 +22,8 @@ interface StatsData {
 }
 
 const LEVEL_COLORS: Record<string, string> = {
-  Beginner: '#d0f4de',
-  Elementary: '#a9def9',
+  Beginner: '#e4c1f9',
+  Elementary: '#e4c1f9',
   Intermediate: '#fcf6bd',
   'Upper-Intermediate': '#ff99c8',
   Advanced: '#e4c1f9',
@@ -39,7 +39,7 @@ const LEVEL_KOREAN: Record<string, string> = {
   Proficient: '원어민급',
 }
 
-const PIE_COLORS = ['#ff99c8', '#a9def9', '#d0f4de', '#fcf6bd', '#e4c1f9', '#ff99c8', '#a9def9', '#d0f4de']
+const PIE_COLORS = ['#ff99c8', '#e4c1f9', '#e4c1f9', '#fcf6bd', '#e4c1f9', '#ff99c8', '#e4c1f9', '#e4c1f9']
 
 export default function StatsPage() {
   const [stats, setStats] = useState<StatsData | null>(null)
@@ -48,7 +48,7 @@ export default function StatsPage() {
   useEffect(() => {
     fetch('/api/stats')
       .then(r => r.json())
-      .then(data => { setStats(data); setLoading(false) })
+      .then((data: any) => { setStats(data); setLoading(false) })
   }, [])
 
   if (loading) {
@@ -111,7 +111,7 @@ export default function StatsPage() {
 
         {/* Key metrics */}
         <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="card" style={{ background: '#a9def9' }}>
+          <div className="card" style={{ background: '#e4c1f9' }}>
             <div className="text-2xl font-bold" style={{ color: '#1a1a1a' }}>{stats.totalWords}</div>
             <div className="text-xs mt-0.5" style={{ color: '#1a1a1a' }}>모은 단어</div>
             <div className="text-xs mt-1" style={{ color: '#1a1a1a', opacity: 0.7 }}>{stats.masteredWords}개 암기 완료 ({masteryPct}%)</div>
@@ -131,7 +131,7 @@ export default function StatsPage() {
             <div className="text-xs mt-0.5" style={{ color: '#1a1a1a' }}>오늘 복습할 것</div>
           </div>
 
-          <div className="card" style={{ background: '#d0f4de' }}>
+          <div className="card" style={{ background: '#e4c1f9' }}>
             <div className="text-2xl font-bold" style={{ color: '#1a1a1a' }}>{stats.dailyGoal}</div>
             <div className="text-xs mt-0.5" style={{ color: '#1a1a1a' }}>하루 목표</div>
           </div>
@@ -148,12 +148,12 @@ export default function StatsPage() {
                 contentStyle={{ borderRadius: '12px', border: '1px solid #ff99c8', fontSize: '12px' }}
                 formatter={(value: number, name: string) => [value, name === 'added' ? '추가한 단어' : '퀴즈']}
               />
-              <Bar dataKey="added" fill="#a9def9" radius={[4, 4, 0, 0]} name="added" />
+              <Bar dataKey="added" fill="#e4c1f9" radius={[4, 4, 0, 0]} name="added" />
               <Bar dataKey="quizzed" fill="#e4c1f9" radius={[4, 4, 0, 0]} name="quizzed" />
             </BarChart>
           </ResponsiveContainer>
           <div className="flex gap-4 justify-center mt-2 text-xs text-gray-500">
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#a9def9' }}></span>추가한 단어</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#e4c1f9' }}></span>추가한 단어</span>
             <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#e4c1f9' }}></span>퀴즈</span>
           </div>
         </div>

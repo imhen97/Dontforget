@@ -1,3 +1,4 @@
+export const runtime = 'edge'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUserFromRequest } from '@/lib/auth'
@@ -8,7 +9,7 @@ export async function POST(req: NextRequest) {
   const authUser = await getAuthUserFromRequest(req)
   if (!authUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { sessionId, wordId, correct, responseTime } = await req.json()
+  const { sessionId, wordId, correct, responseTime } = await req.json() as any
 
   const word = await prisma.word.findFirst({
     where: { id: wordId, userId: authUser.userId },
@@ -67,8 +68,8 @@ async function updateStreak(userId: string) {
   const user = await prisma.user.findUnique({ where: { id: userId } })
   if (!user) return
 
-  const today = new Date().toISOString().split('T')[0]
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+  const today = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10)
+  const yesterday = new Date(Date.now() + 9 * 3600000 - 86400000).toISOString().slice(0, 10)
 
   if (user.lastStudyDay === today) return // Already counted today
 

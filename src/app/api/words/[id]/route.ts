@@ -1,3 +1,4 @@
+export const runtime = 'edge'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUserFromRequest } from '@/lib/auth'
@@ -8,7 +9,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   if (!authUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
-  const data = await req.json()
+  const data = await req.json() as any
 
   const word = await prisma.word.findFirst({ where: { id, userId: authUser.userId } })
   if (!word) return NextResponse.json({ error: 'Not found' }, { status: 404 })

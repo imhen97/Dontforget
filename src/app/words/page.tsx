@@ -88,10 +88,10 @@ function speak(text: string) {
 }
 
 const TYPE_BADGES: Record<string, { label: string; bg: string; color: string }> = {
-  word:     { label: '단어',  bg: '#a9def9', color: '#1a1a1a' },
-  phrase:   { label: '숙어',  bg: '#e4c1f9', color: '#1a1a1a' },
-  slang:    { label: '슬랭',  bg: '#ff99c8', color: '#1a1a1a' },
-  sentence: { label: '문장',  bg: '#d0f4de', color: '#1a1a1a' },
+  word:     { label: '단어',  bg: '#e4c1f9', color: 'var(--ink)' },
+  phrase:   { label: '숙어',  bg: '#e4c1f9', color: 'var(--ink)' },
+  slang:    { label: '슬랭',  bg: '#ff99c8', color: 'var(--ink)' },
+  sentence: { label: '문장',  bg: '#e4c1f9', color: 'var(--ink)' },
 }
 const TYPE_OPTIONS = [
   { value: 'word',     label: '단어' },
@@ -102,24 +102,24 @@ const TYPE_OPTIONS = [
 
 const DEFAULT_TOPICS = ['Business', 'Academic', 'Daily Life', 'Travel', 'Technology', 'Nature', 'Emotions', 'Food', 'Health', 'General']
 const TOPICS = ['all', ...DEFAULT_TOPICS]
-const DIFFICULTY_LABELS = ['', '하', '중', '상', '최상']
-const DIFFICULTY_COLORS = ['', '#d0f4de', '#a9def9', '#fcf6bd', '#e4c1f9']
 
 function WordsContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const [rawWords, setRawWords] = useState<Word[]>([])
   const [words, setWords] = useState<Word[]>([])
   const [loading, setLoading] = useState(true)
   const [aiLoading, setAiLoading] = useState(false)
   const [showAddModal, setShowAddModal] = useState(searchParams.get('add') === '1')
   const [selectedTopic, setSelectedTopic] = useState('all')
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all')
   const [search, setSearch] = useState('')
+  const [showSearch, setShowSearch] = useState(false)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [editId, setEditId] = useState<string | null>(null)
   const [dateView, setDateView] = useState<'all' | 'today' | 'range'>('all')
   const [dateRange, setDateRange] = useState({ from: '', to: '' })
 
+  const [inputLang, setInputLang] = useState<'ko' | 'en'>('en')
   const [form, setForm] = useState({
     word: '',
     translation: '',
@@ -154,7 +154,7 @@ function WordsContent() {
     let cancelled = false
     fetch('/api/auth/me', { credentials: 'include' })
       .then(res => res.ok ? res.json() : null)
-      .then(data => {
+      .then((data: any) => {
         if (!cancelled && data != null) {
           setCustomTopics(Array.isArray(data.customTopics) ? data.customTopics : [])
         }
@@ -172,7 +172,7 @@ function WordsContent() {
         body: JSON.stringify({ customTopics: next }),
         credentials: 'include',
       })
-      const data = res.ok ? await res.json() : null
+      const data: any = res.ok ? await res.json() : null
       if (res.ok && data != null && Array.isArray(data.customTopics)) {
         setCustomTopics(data.customTopics)
         return true
@@ -200,10 +200,15 @@ function WordsContent() {
     const normalized = /[\uAC00-\uD7A3]/.test(value) ? value : value.toLowerCase()
     setForm(f => ({ ...f, word: normalized }))
     value = normalized
-    setShowSuggestions(true)
-    if (suggestTimer.current) clearTimeout(suggestTimer.current)
-    const isKorean = /[\uAC00-\uD7A3]/.test(value)
-    suggestTimer.current = setTimeout(() => fetchSuggestions(value), isKorean ? 600 : 250)
+    const isKoreanText = /[\uAC00-\uD7A3]/.test(value)
+    if (inputLang === 'ko' || isKoreanText) {
+      setSuggestions([])
+      setShowSuggestions(false)
+    } else {
+      setShowSuggestions(true)
+      if (suggestTimer.current) clearTimeout(suggestTimer.current)
+      suggestTimer.current = setTimeout(() => fetchSuggestions(value), 250)
+    }
 
     if (topicTimer.current) clearTimeout(topicTimer.current)
     if (value.trim().length >= 2) {
@@ -214,7 +219,7 @@ function WordsContent() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ word: value.trim(), field: 'topic' }),
           })
-          const data = await res.json()
+          const data: any = await res.json()
           if (res.ok && data.value) setForm(f => ({ ...f, topic: data.value }))
         } catch { /* ignore */ }
       }, 1000)
@@ -227,21 +232,17 @@ function WordsContent() {
     setShowSuggestions(false)
   }
 
-  const filterByDate = useCallback((list: Word[]) => {
+  // 날짜 필터를 클라이언트에서 즉시 적용
+  useEffect(() => {
     const today = new Date().toISOString().slice(0, 10)
-    let result = list
+    let result = rawWords
     if (dateView === 'today') {
-      result = result.filter(w => w.createdAt.slice(0, 10) === today)
+      result = rawWords.filter(w => w.createdAt.slice(0, 10) === today)
     } else if (dateView === 'range' && dateRange.from && dateRange.to) {
-      result = result.filter(w => w.createdAt.slice(0, 10) >= dateRange.from && w.createdAt.slice(0, 10) <= dateRange.to)
+      result = rawWords.filter(w => w.createdAt.slice(0, 10) >= dateRange.from && w.createdAt.slice(0, 10) <= dateRange.to)
     }
-    if (selectedDifficulty !== 'all') {
-      const tierMap: Record<string, number[]> = { '하': [1, 2], '중': [3], '상': [4], '최상': [5, 6] }
-      const levels = tierMap[selectedDifficulty] ?? []
-      result = result.filter(w => levels.includes(w.difficulty))
-    }
-    return result
-  }, [dateView, dateRange, selectedDifficulty])
+    setWords(result)
+  }, [rawWords, dateView, dateRange])
 
   const fetchWords = useCallback(async () => {
     const params = new URLSearchParams()
@@ -250,15 +251,14 @@ function WordsContent() {
 
     try {
       const res = await fetch(`/api/words?${params}`, { credentials: 'include' })
-      const data = await res.json().catch(() => [])
-      const filtered = filterByDate(Array.isArray(data) ? data : [])
-      setWords(filtered)
+      const data: any = await res.json().catch(() => [])
+      setRawWords(Array.isArray(data) ? data : [])
     } catch {
-      setWords([])
+      setRawWords([])
     } finally {
       setLoading(false)
     }
-  }, [selectedTopic, search, filterByDate])
+  }, [selectedTopic, search])
 
   useEffect(() => {
     fetchWords()
@@ -300,7 +300,7 @@ function WordsContent() {
           examples: filledExamples,
         }),
       })
-      let data: Word | { error?: string; word?: { id: string } }
+      let data: any
       try {
         data = await res.json()
       } catch {
@@ -309,20 +309,20 @@ function WordsContent() {
       }
 
       if (!res.ok) {
-        const err = data as { error?: string; word?: { id: string } }
         if (res.status === 409) {
           setFormError('이미 저장된 단어예요.')
-          setDuplicateId(err.word?.id ?? null)
+          setDuplicateId(data.word?.id ?? null)
         } else {
-          setFormError(err.error || '오류가 발생했어요.')
+          setFormError(data.error || '오류가 발생했어요.')
         }
         return
       }
       setDuplicateId(null)
 
-      setWords(prev => [data as Word, ...prev])
+      setRawWords(prev => [data as Word, ...prev])
       setForm({ word: '', translation: '', topic: 'General' })
       setExamples([{ exampleEn: '', exampleKo: '' }, { exampleEn: '', exampleKo: '' }])
+      setInputLang('en')
       setShowAddModal(false)
       router.replace('/words')
     } catch {
@@ -344,7 +344,7 @@ function WordsContent() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ word: text.trim(), field: 'translateExample' }),
         })
-        const data = await res.json()
+        const data: any = await res.json()
         if (res.ok && data.value) {
           setExamples(prev => prev.map((e, i) => i === index ? { ...e, exampleKo: data.value } : e))
         }
@@ -361,7 +361,7 @@ function WordsContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ word: form.word.trim(), field, count: examples.length }),
       })
-      const data = await res.json()
+      const data: any = await res.json()
       if (!res.ok) return
       if (field === 'translation' && data.value) {
         const translationText = Array.isArray(data.meanings) && data.meanings.length > 0
@@ -381,7 +381,7 @@ function WordsContent() {
     setAiLoading(true)
     try {
       await fetch(`/api/words/${duplicateId}`, { method: 'DELETE' })
-      setWords(prev => prev.filter(w => w.id !== duplicateId))
+      setRawWords(prev => prev.filter(w => w.id !== duplicateId))
       setDuplicateId(null)
       setFormError('')
       // 삭제 후 바로 재저장
@@ -398,9 +398,9 @@ function WordsContent() {
           examples: filledExamples,
         }),
       })
-      const data = await res.json()
+      const data: any = await res.json()
       if (res.ok) {
-        setWords(prev => [data, ...prev])
+        setRawWords(prev => [data, ...prev])
         setForm({ word: '', translation: '', topic: 'General' })
         setExamples([{ exampleEn: '', exampleKo: '' }, { exampleEn: '', exampleKo: '' }])
         setShowAddModal(false)
@@ -433,7 +433,7 @@ function WordsContent() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(sm2),
     })
-    setWords(prev => prev.map(w => w.id === word.id ? { ...w, ...sm2 } : w))
+    setRawWords(prev => prev.map(w => w.id === word.id ? { ...w, ...sm2 } : w))
 
     setReviewQueue(prev => {
       const rest = prev.slice(1)
@@ -453,7 +453,7 @@ function WordsContent() {
   const handleDelete = async (id: string) => {
     if (!confirm('이 단어를 삭제할까요?')) return
     await fetch(`/api/words/${id}`, { method: 'DELETE' })
-    setWords(prev => prev.filter(w => w.id !== id))
+    setRawWords(prev => prev.filter(w => w.id !== id))
   }
 
   const handleMastered = async (word: Word) => {
@@ -463,8 +463,8 @@ function WordsContent() {
       body: JSON.stringify({ mastered: !word.mastered }),
     })
     if (res.ok) {
-      const updated = await res.json()
-      setWords(prev => prev.map(w => w.id === word.id ? updated : w))
+      const updated: any = await res.json()
+      setRawWords(prev => prev.map(w => w.id === word.id ? updated : w))
     }
   }
 
@@ -480,8 +480,8 @@ function WordsContent() {
       body: JSON.stringify(payload),
     })
     if (res.ok) {
-      const updated = await res.json()
-      setWords(prev => prev.map(w => w.id === id ? updated : w))
+      const updated: any = await res.json()
+      setRawWords(prev => prev.map(w => w.id === id ? updated : w))
       setEditId(null)
     }
   }
@@ -491,36 +491,61 @@ function WordsContent() {
       <Navbar />
       <main className="max-w-2xl mx-auto px-4 py-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="page-title">📖 단어장</h1>
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-3">
             <p className="text-gray-500 text-sm">총 {words.length}개 단어</p>
+            <button
+              onClick={() => { setShowSearch(s => !s); if (showSearch) setSearch('') }}
+              className="text-xl leading-none"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 6px', color: search ? 'var(--pink)' : '#aaa' }}
+              title="검색"
+            >
+              🔍
+            </button>
           </div>
-          <div className="flex items-center gap-2">
+          {showSearch && (
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="단어 검색..."
+              className="input-field mb-3"
+              autoFocus
+            />
+          )}
+          {/* 복습 버튼 2개 */}
+          <div className="grid grid-cols-2 gap-2 mb-3">
             <button
               onClick={() => startReview('once')}
               disabled={words.length === 0}
-              className="btn-secondary flex items-center gap-1.5 disabled:opacity-40"
+              className="btn-primary flex-1 disabled:opacity-40"
+              style={{ padding: '7px 12px', minHeight: 36, fontSize: '0.82rem' }}
             >
               🧠 복습하기
             </button>
             <button
               onClick={() => startReview('infinite')}
               disabled={words.length === 0}
-              className="btn-secondary flex items-center gap-1.5 disabled:opacity-40"
+              className="btn-primary flex-1 disabled:opacity-40"
+              style={{ padding: '7px 12px', minHeight: 36, fontSize: '0.82rem' }}
             >
               🔁 무한 복습
             </button>
-            <button onClick={() => setShowAddModal(true)} className="btn-primary flex items-center gap-1.5">
-              <span>➕</span> 단어 추가
-            </button>
           </div>
+          {/* 단어 추가 버튼 */}
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="btn-primary btn-pink w-full"
+            style={{ padding: '7px 12px', minHeight: 36, fontSize: '0.82rem' }}
+          >
+            ➕ 단어 추가하기
+          </button>
         </div>
 
         {/* Date View Tabs */}
         <div className="flex mb-4 border-b-2" style={{ borderColor: '#ff99c8' }}>
           {(['all', 'today', 'range'] as const).map((v, i) => {
-            const tabColors = ['#a9def9', '#a9def9', '#a9def9']
+            const tabColors = ['#e4c1f9', '#e4c1f9', '#e4c1f9']
             const active = dateView === v
             return (
               <button
@@ -545,7 +570,7 @@ function WordsContent() {
         </div>
 
         {dateView === 'range' && (
-          <div className="mb-4 px-4 py-3 space-y-3" style={{ background: '#fff', border: '2px solid #a9def9', borderLeft: '4px solid #ff99c8', borderRadius: '4px 8px 8px 4px', boxShadow: '2px 2px 0px #a9def9' }}>
+          <div className="mb-4 px-4 py-3 space-y-3" style={{ background: '#fff', border: '2px solid #e4c1f9', borderLeft: '4px solid #ff99c8', borderRadius: '4px 8px 8px 4px', boxShadow: '2px 2px 0px #e4c1f9' }}>
             <div className="flex gap-2">
               {[
                 { label: '1주', days: 7 },
@@ -563,10 +588,10 @@ function WordsContent() {
                     style={{
                       fontFamily: "'Gaegu', sans-serif",
                       borderRadius: '6px',
-                      border: isActive ? '2px solid #1a1a1a' : '2px solid #a9def9',
-                      background: isActive ? '#a9def9' : '#ffffff',
-                      color: '#1a1a1a',
-                      boxShadow: isActive ? '2px 2px 0px #a9def9' : 'none',
+                      border: isActive ? '2px solid #1a1a1a' : '2px solid #e4c1f9',
+                      background: isActive ? '#e4c1f9' : '#ffffff',
+                      color: 'var(--ink)',
+                      boxShadow: isActive ? '2px 2px 0px #e4c1f9' : 'none',
                     }}
                   >
                     {label}
@@ -575,21 +600,12 @@ function WordsContent() {
               })}
             </div>
             <div className="flex items-center gap-2">
-              <input type="date" value={dateRange.from} onChange={e => setDateRange(r => ({ ...r, from: e.target.value }))} className="text-sm outline-none flex-1" style={{ color: '#1a1a1a', borderBottom: '2px solid #ff99c8', background: 'transparent', padding: '4px 0' }} />
+              <input type="date" value={dateRange.from} onChange={e => setDateRange(r => ({ ...r, from: e.target.value }))} className="text-sm outline-none flex-1" style={{ color: 'var(--ink)', borderBottom: '2px solid #ff99c8', background: 'transparent', padding: '4px 0' }} />
               <span className="text-sm" style={{ color: '#aaa' }}>~</span>
-              <input type="date" value={dateRange.to} onChange={e => setDateRange(r => ({ ...r, to: e.target.value }))} className="text-sm outline-none flex-1" style={{ color: '#1a1a1a', borderBottom: '2px solid #ff99c8', background: 'transparent', padding: '4px 0' }} />
+              <input type="date" value={dateRange.to} onChange={e => setDateRange(r => ({ ...r, to: e.target.value }))} className="text-sm outline-none flex-1" style={{ color: 'var(--ink)', borderBottom: '2px solid #ff99c8', background: 'transparent', padding: '4px 0' }} />
             </div>
           </div>
         )}
-
-        {/* Search */}
-        <input
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="🔍 단어 검색..."
-          className="input-field mb-4"
-        />
 
         {/* Topic Filter */}
         <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
@@ -602,7 +618,7 @@ function WordsContent() {
                 borderRadius: '4px',
                 border: selectedTopic === t ? '2px solid #1a1a1a' : '2px solid #ff99c8',
                 background: selectedTopic === t ? '#ff99c8' : '#ffffff',
-                color: '#1a1a1a',
+                color: 'var(--ink)',
                 boxShadow: selectedTopic === t ? '2px 2px 0px #1a1a1a' : 'none',
                 whiteSpace: 'nowrap',
               }}
@@ -616,9 +632,9 @@ function WordsContent() {
             className="flex-shrink-0 px-3 py-1.5 text-xs font-semibold transition-all"
             style={{
               borderRadius: '4px',
-              border: '2px solid #a9def9',
-              background: showTopicManage ? '#a9def9' : '#ffffff',
-              color: '#1a1a1a',
+              border: '2px solid #e4c1f9',
+              background: showTopicManage ? '#e4c1f9' : '#ffffff',
+              color: 'var(--ink)',
               whiteSpace: 'nowrap',
             }}
           >
@@ -627,7 +643,7 @@ function WordsContent() {
         </div>
 
         {showTopicManage && (
-          <div className="mb-4 p-3 rounded-xl border-2 border-[#a9def9] bg-white/80 space-y-3">
+          <div className="mb-4 p-3 rounded-xl border-2 border-[#e4c1f9] bg-white/80 space-y-3">
             <p className="text-xs font-medium text-gray-600">추가한 카테고리 (제거 가능)</p>
             {topicSaveError && (
               <p className="text-xs text-red-600">{topicSaveError}</p>
@@ -638,7 +654,7 @@ function WordsContent() {
                   <span
                     key={t}
                     className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium"
-                    style={{ background: '#fcf6bd', color: '#1a1a1a' }}
+                    style={{ background: 'var(--yellow)', color: 'var(--ink)' }}
                   >
                     {t}
                     <button
@@ -699,34 +715,6 @@ function WordsContent() {
           </div>
         )}
 
-        {/* Difficulty Filter */}
-        <div className="flex gap-2 mb-4">
-          {[
-            { label: '전체', value: 'all', bg: '#ffffff',  color: '#1a1a1a', border: '#ff99c8' },
-            { label: '하',   value: '하',   bg: '#d0f4de', color: '#1a1a1a', border: '#d0f4de' },
-            { label: '중',   value: '중',   bg: '#a9def9', color: '#1a1a1a', border: '#a9def9' },
-            { label: '상',   value: '상',   bg: '#fcf6bd', color: '#1a1a1a', border: '#fcf6bd' },
-            { label: '최상', value: '최상', bg: '#e4c1f9', color: '#1a1a1a', border: '#e4c1f9' },
-          ].map(({ label, value, bg, color, border }) => {
-            const active = selectedDifficulty === value
-            return (
-            <button
-              key={value}
-              onClick={() => setSelectedDifficulty(value)}
-              className="flex-1 py-1.5 text-xs font-semibold transition-all"
-              style={{
-                borderRadius: '4px',
-                border: `2px solid ${active ? color : border}`,
-                background: bg,
-                color,
-                boxShadow: active ? `2px 2px 0px ${border}` : 'none',
-                opacity: active ? 1 : 0.65,
-              }}
-            >
-              {label}
-            </button>
-          )})}
-        </div>
 
         {/* Word List */}
         {loading ? (
@@ -741,9 +729,9 @@ function WordsContent() {
             </button>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {words.map(word => (
-              <div key={word.id} className="card">
+              <div key={word.id} className="card" style={{ padding: '8px 12px' }}>
                 {editId === word.id ? (
                   // Edit mode
                   <div className="space-y-2">
@@ -814,7 +802,7 @@ function WordsContent() {
                               className="tag text-xs transition-all"
                               style={current === opt.value
                                 ? { background: badge.bg, color: badge.color, outline: `2px solid ${badge.bg}` }
-                                : { background: '#fcf6bd', color: '#888' }}
+                                : { background: 'var(--yellow)', color: '#888' }}
                             >
                               {opt.label}
                             </button>
@@ -844,52 +832,63 @@ function WordsContent() {
                   // View mode
                   <>
                     <div
-                      className="flex cursor-pointer"
+                      className="flex items-stretch cursor-pointer"
                       onClick={() => setExpandedId(expandedId === word.id ? null : word.id)}
                     >
-                      {/* 좌: 영단어 영역 */}
-                      <div className="flex-1 min-w-0 relative flex items-center justify-center py-4 pr-4">
-                        {/* 좌상: 뱃지 (절대 위치) */}
-                        <div className="absolute top-0 left-0 flex items-center gap-1">
-                          {word.type && TYPE_BADGES[word.type] && (
-                            <span className="tag text-xs" style={{ background: TYPE_BADGES[word.type].bg, color: TYPE_BADGES[word.type].color }}>
-                              {TYPE_BADGES[word.type].label}
-                            </span>
-                          )}
-                          {word.difficulty > 0 && (
-                            <span className="tag text-xs" style={{ background: DIFFICULTY_COLORS[word.difficulty], color: '#1a1a1a' }}>
-                              {DIFFICULTY_LABELS[word.difficulty]}
-                            </span>
-                          )}
-                          {word.mastered && <span className="tag text-xs" style={{ background: '#d0f4de', color: '#1a1a1a' }}>✓</span>}
-                        </div>
-                        {/* 중앙: 영단어 */}
+                      {/* 좌: 영단어 */}
+                      <div className="flex flex-col justify-center py-3 pr-4 gap-1" style={{ minWidth: 0, flex: '1.1' }}>
                         <button
                           type="button"
-                          className={`font-bold text-2xl hover:text-[#a9def9] transition-colors text-center font-handwrite ${word.mastered ? 'line-through' : ''}`}
-                          style={{ color: word.mastered ? '#aaa' : '#1a1a1a' }}
+                          className={`font-bold text-3xl font-handwrite text-left hover:text-[#e4c1f9] transition-colors leading-tight tracking-tight ${word.mastered ? 'line-through' : ''}`}
+                          style={{ color: word.mastered ? '#bbb' : '#1a1a1a' }}
                           onClick={e => { e.stopPropagation(); speak(word.word) }}
                           title="발음 듣기"
                         >
                           {word.word}
                         </button>
+                        {(word.type && TYPE_BADGES[word.type] && word.type !== 'word') || word.mastered ? (
+                          <div className="flex items-center gap-1">
+                            {word.type && TYPE_BADGES[word.type] && word.type !== 'word' && (
+                              <span className="tag text-xs" style={{ background: TYPE_BADGES[word.type].bg, color: TYPE_BADGES[word.type].color }}>
+                                {TYPE_BADGES[word.type].label}
+                              </span>
+                            )}
+                            {word.mastered && (
+                              <span className="tag text-xs" style={{ background: '#e4c1f9', color: 'var(--ink)' }}>암기완료</span>
+                            )}
+                          </div>
+                        ) : null}
                       </div>
 
                       {/* 세로 구분선 */}
-                      <div className="w-px self-stretch mx-1 shrink-0" style={{ background: '#e4c1f9' }} />
+                      <div className="w-px self-stretch shrink-0" style={{ background: 'var(--purple)', opacity: 0.4 }} />
 
-                      {/* 우: 한글 의미 영역 */}
-                      <div className="flex-1 min-w-0 relative flex items-center justify-center py-4 pl-4">
-                        {/* 우상: 액션 버튼 (절대 위치) */}
-                        <div
-                          className="absolute top-0 right-0 flex items-center gap-0.5"
-                          onClick={e => e.stopPropagation()}
-                        >
+                      {/* 우: 한글 의미 + 액션 버튼 */}
+                      <div className="flex items-center gap-2 py-3 pl-4 flex-1 min-w-0">
+                        {/* 한글 뜻 */}
+                        <div className="flex-1 min-w-0">
+                          {(() => {
+                            let meaning = word.translation
+                            if (word.meanings) {
+                              try {
+                                const parsed = JSON.parse(word.meanings)
+                                if (Array.isArray(parsed) && parsed.length > 0) meaning = parsed[0]
+                              } catch { /* ignore */ }
+                            }
+                            return (
+                              <span className="text-xl font-handwrite leading-snug font-medium" style={{ color: word.mastered ? '#bbb' : '#6b5b95' }}>
+                                {meaning}
+                              </span>
+                            )
+                          })()}
+                        </div>
+                        {/* 액션 버튼 */}
+                        <div className="flex flex-col items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
                           <button
                             onClick={() => handleMastered(word)}
                             title={word.mastered ? '학습 중으로 변경' : '암기 완료로 표시'}
-                            className="p-0.5 rounded text-xs transition-colors"
-                            style={{ color: word.mastered ? '#d0f4de' : '#ccc' }}
+                            className="w-6 h-6 flex items-center justify-center rounded-full text-xs transition-colors hover:bg-[#f0eaff]"
+                            style={{ color: word.mastered ? '#c084fc' : '#ccc' }}
                           >✓</button>
                           <button
                             onClick={() => {
@@ -905,36 +904,18 @@ function WordsContent() {
                               if (list.length === 0) list = [{ exampleEn: '', exampleKo: '' }]
                               setEditExamples(list)
                             }}
-                            className="p-0.5 rounded text-xs transition-colors hover:text-[#a9def9]" style={{ color: '#ccc' }}
+                            className="w-6 h-6 flex items-center justify-center rounded-full text-xs transition-colors hover:bg-[#f0eaff]" style={{ color: '#ccc' }}
                           >✏️</button>
                           <button
                             onClick={() => handleDelete(word.id)}
-                            className="p-0.5 rounded text-xs transition-colors hover:text-[#ff99c8]" style={{ color: '#ccc' }}
+                            className="w-6 h-6 flex items-center justify-center rounded-full text-xs transition-colors hover:bg-[#fff0f5]" style={{ color: '#ccc' }}
                           >🗑️</button>
-                        </div>
-                        {/* 중앙: 한글 뜻 1~2개 */}
-                        <div className="flex flex-col items-center gap-1 text-center">
-                          {(() => {
-                            const list: string[] = []
-                            if (word.meanings) {
-                              try {
-                                const parsed = JSON.parse(word.meanings)
-                                if (Array.isArray(parsed)) list.push(...parsed.slice(0, 2))
-                              } catch { /* ignore */ }
-                            }
-                            if (list.length === 0) list.push(word.translation)
-                            return list.map((m, i) => (
-                              <span key={i} className={`font-bold text-2xl leading-tight font-handwrite ${i === 1 ? 'text-xl' : ''}`} style={{ color: i === 1 ? '#aaa' : '#1a1a1a' }}>
-                                {m}
-                              </span>
-                            ))
-                          })()}
                         </div>
                       </div>
                     </div>
 
                     {expandedId === word.id && (
-                      <div className="mt-3 pt-3 animate-fade-in" style={{ borderTop: '1.5px dashed #a9def9' }}>
+                      <div className="mt-3 pt-3 animate-fade-in" style={{ borderTop: '1.5px dashed #e4c1f9' }}>
                         {(() => {
                           let list: { exampleEn?: string; exampleKo?: string }[] = []
                           if (word.examples) {
@@ -944,11 +925,11 @@ function WordsContent() {
                             list = [{ exampleEn: word.exampleEn, exampleKo: word.exampleKo }]
                           }
                           return list.map((ex, i) => (
-                            <div key={i} className="rounded p-3 mb-2" style={{ background: '#fcf6bd', border: '1.5px solid #a9def9', borderLeft: '3px solid #ff99c8' }}>
+                            <div key={i} className="rounded p-3 mb-2" style={{ background: 'var(--yellow)', border: '1.5px solid #e4c1f9', borderLeft: '3px solid #ff99c8' }}>
                               <button
                                 type="button"
                                 onClick={() => ex.exampleEn && speak(ex.exampleEn)}
-                                className="text-sm italic hover:text-[#a9def9] transition-colors text-left w-full" style={{ color: '#1a1a1a' }}
+                                className="text-sm italic hover:text-[#e4c1f9] transition-colors text-left w-full" style={{ color: 'var(--ink)' }}
                                 title="예문 발음 듣기"
                               >
                                 "{ex.exampleEn}"
@@ -960,7 +941,7 @@ function WordsContent() {
                           ))
                         })()}
                         <div className="flex items-center justify-between text-xs text-gray-400">
-                          <span className="tag" style={{ background: '#fcf6bd', color: '#1a1a1a' }}>{word.topic || 'General'}</span>
+                          <span className="tag" style={{ background: 'var(--yellow)', color: 'var(--ink)' }}>{word.topic || 'General'}</span>
                           <span>{new Date(word.createdAt).toLocaleDateString('ko-KR')}</span>
                         </div>
                       </div>
@@ -976,32 +957,55 @@ function WordsContent() {
       {/* Add Word Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md p-6 animate-fade-in max-h-[90vh] overflow-y-auto" style={{ background: '#fff', borderRadius: '4px 16px 16px 4px', border: '2px solid #a9def9', borderLeft: '5px solid #ff99c8', boxShadow: '4px 4px 0px #ff99c8' }}>
+          <div className="w-full max-w-md p-6 animate-fade-in max-h-[90vh] overflow-y-auto" style={{ background: '#fff', borderRadius: '4px 16px 16px 4px', border: '2px solid #e4c1f9', borderLeft: '5px solid #ff99c8', boxShadow: '4px 4px 0px #ff99c8' }}>
             <h2 className="text-xl font-bold text-gray-800 mb-1">✨ 새 단어 추가</h2>
-            <p className="text-sm text-gray-500 mb-5">번역·예문을 비우면 AI가 자동으로 채워줘요.</p>
+            <p className="text-sm text-gray-500 mb-3">번역·예문을 비우면 AI가 자동으로 채워줘요.</p>
+
+            {/* 입력 언어 토글 */}
+            <div className="flex gap-1 mb-4 p-1 rounded-xl" style={{ background: '#f3f0f5', width: 'fit-content' }}>
+              <button
+                type="button"
+                onClick={() => { setInputLang('en'); setForm(f => ({ ...f, word: '' })); setSuggestions([]) }}
+                className="text-sm font-bold px-4 py-1.5 rounded-lg transition-all"
+                style={{
+                  background: inputLang === 'en' ? 'var(--yellow)' : 'transparent',
+                  color: inputLang === 'en' ? 'var(--ink)' : '#aaa',
+                  border: inputLang === 'en' ? '2px solid var(--pink)' : '2px solid transparent',
+                }}
+              >🇺🇸 영어로</button>
+              <button
+                type="button"
+                onClick={() => { setInputLang('ko'); setForm(f => ({ ...f, word: '' })); setSuggestions([]) }}
+                className="text-sm font-bold px-4 py-1.5 rounded-lg transition-all"
+                style={{
+                  background: inputLang === 'ko' ? 'var(--yellow)' : 'transparent',
+                  color: inputLang === 'ko' ? 'var(--ink)' : '#aaa',
+                  border: inputLang === 'ko' ? '2px solid var(--pink)' : '2px solid transparent',
+                }}
+              >🇰🇷 한국어로</button>
+            </div>
 
             <form onSubmit={handleAdd} className="space-y-3">
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">단어 / 숙어 *</label>
                 <input
                   value={form.word}
                   onChange={e => handleWordInput(e.target.value)}
                   onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
                   onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
                   className="input-field"
-                  placeholder="예: serendipity, break a leg..."
+                  placeholder={inputLang === 'ko' ? '예: 행복, 도전하다, 감사하다...' : '예: serendipity, break a leg...'}
                   autoComplete="off"
                   required
                 />
                 {showSuggestions && suggestions.length > 0 && (
-                  <ul className="absolute z-10 w-full bg-white rounded-xl shadow-lg mt-1 overflow-hidden" style={{ border: '2px solid #a9def9' }}>
+                  <ul className="absolute z-10 w-full bg-white rounded-xl shadow-lg mt-1 overflow-hidden" style={{ border: '2px solid #e4c1f9' }}>
                     {suggestions.map((s, i) => (
                       <li
                         key={s}
                         onMouseDown={() => selectSuggestion(s)}
-                        className={`px-4 py-2 text-sm cursor-pointer hover:bg-[#fcf6bd] flex items-center gap-2 ${i === 0 ? 'font-semibold' : ''}`} style={{ color: '#1a1a1a' }}
+                        className={`px-4 py-2 text-sm cursor-pointer hover:bg-[#fcf6bd] flex items-center gap-2 ${i === 0 ? 'font-semibold' : ''}`} style={{ color: 'var(--ink)' }}
                       >
-                        {i === 0 && <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ background: '#ff99c8', color: '#1a1a1a' }}>추천</span>}
+                        {i === 0 && <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'var(--pink)', color: 'var(--ink)' }}>추천</span>}
                         {s}
                       </li>
                     ))}
@@ -1018,7 +1022,7 @@ function WordsContent() {
                     type="button"
                     onClick={() => fetchAiField('translation')}
                     disabled={!form.word.trim() || aiFieldLoading === 'translation'}
-                    className="text-xs font-bold px-2 py-0.5 rounded-full transition-all disabled:opacity-40" style={{ background: '#a9def9', color: '#1a1a1a' }}
+                    className="text-xs font-bold px-2 py-0.5 rounded-full transition-all disabled:opacity-40" style={{ background: 'var(--purple)', color: 'var(--ink)' }}
                   >
                     {aiFieldLoading === 'translation' ? '생성 중...' : '✨ AI로 생성'}
                   </button>
@@ -1050,7 +1054,7 @@ function WordsContent() {
                       type="button"
                       onClick={() => fetchAiField('examples')}
                       disabled={!form.word.trim() || aiFieldLoading === 'examples'}
-                      className="text-xs font-bold px-2 py-0.5 rounded-full transition-all disabled:opacity-40" style={{ background: '#a9def9', color: '#1a1a1a' }}
+                      className="text-xs font-bold px-2 py-0.5 rounded-full transition-all disabled:opacity-40" style={{ background: 'var(--purple)', color: 'var(--ink)' }}
                     >
                       {aiFieldLoading === 'examples' ? '생성 중...' : '✨ AI로 생성'}
                     </button>
@@ -1101,13 +1105,13 @@ function WordsContent() {
               </div>
 
               {formError && (
-                <div className="rounded-xl px-4 py-2 text-sm flex items-center justify-between gap-2" style={{ background: '#fcf6bd', color: '#1a1a1a', border: '2px solid #ff99c8' }}>
+                <div className="rounded-xl px-4 py-2 text-sm flex items-center justify-between gap-2" style={{ background: 'var(--yellow)', color: 'var(--ink)', border: '2px solid #ff99c8' }}>
                   <span>{formError}</span>
                   {duplicateId && (
                     <button
                       type="button"
                       onClick={handleOverwrite}
-                      className="shrink-0 text-xs font-semibold px-3 py-1 rounded-lg transition-colors" style={{ background: '#ff99c8', color: '#1a1a1a' }}
+                      className="shrink-0 text-xs font-semibold px-3 py-1 rounded-lg transition-colors" style={{ background: 'var(--pink)', color: 'var(--ink)' }}
                     >
                       덮어쓰기
                     </button>
@@ -1121,7 +1125,7 @@ function WordsContent() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setShowAddModal(false); router.replace('/words') }}
+                  onClick={() => { setShowAddModal(false); setInputLang('en'); router.replace('/words') }}
                   className="btn-secondary"
                 >
                   취소
@@ -1136,10 +1140,10 @@ function WordsContent() {
         // 완료 화면
         if (reviewQueue.length === 0) return (
           <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="w-full max-w-md p-8 text-center" style={{ background: '#fff', borderRadius: '4px 16px 16px 4px', border: '2px solid #a9def9', borderLeft: '5px solid #ff99c8', boxShadow: '4px 4px 0px #ff99c8' }}>
+            <div className="w-full max-w-md p-8 text-center" style={{ background: '#fff', borderRadius: '4px 16px 16px 4px', border: '2px solid #e4c1f9', borderLeft: '5px solid #ff99c8', boxShadow: '4px 4px 0px #ff99c8' }}>
               <div className="text-6xl mb-4">🎉</div>
               <h2 className="text-2xl font-extrabold text-gray-800 mb-2">복습 완료!</h2>
-              <p className="mb-1" style={{ color: '#888' }}>총 <span className="font-bold" style={{ color: '#1a1a1a' }}>{reviewTotal}개</span> 단어를 모두 복습했어요.</p>
+              <p className="mb-1" style={{ color: '#888' }}>총 <span className="font-bold" style={{ color: 'var(--ink)' }}>{reviewTotal}개</span> 단어를 모두 복습했어요.</p>
               <p className="text-sm mb-6" style={{ color: '#aaa' }}>다음에 또 만나요~ 👋</p>
               <button onClick={() => setShowReview(false)} className="btn-primary w-full">닫기</button>
             </div>
@@ -1152,22 +1156,22 @@ function WordsContent() {
 
         return (
           <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="w-full max-w-md overflow-hidden" style={{ background: '#fff', borderRadius: '4px 16px 16px 4px', border: '2px solid #a9def9', borderLeft: '5px solid #ff99c8', boxShadow: '4px 4px 0px #ff99c8' }}>
+            <div className="w-full max-w-md overflow-hidden" style={{ background: '#fff', borderRadius: '4px 16px 16px 4px', border: '2px solid #e4c1f9', borderLeft: '5px solid #ff99c8', boxShadow: '4px 4px 0px #ff99c8' }}>
               {/* 헤더 */}
               <div className="px-6 pt-5 pb-3 flex items-center justify-between border-b" style={{ borderColor: '#fcf6bd' }}>
                 <div>
                   <p className="text-xs font-medium" style={{ color: '#aaa' }}>{reviewMode === 'infinite' ? '🔁 무한 반복 복습' : '🧠 복습'}</p>
-                  <p className="text-sm font-bold" style={{ color: '#1a1a1a' }}>
-                    완료 <span style={{ color: '#1a1a1a' }}>{doneCount}</span> / {reviewTotal}
-                    <span className="ml-2 font-normal text-xs" style={{ color: '#1a1a1a' }}>남은 카드 {reviewQueue.length}장</span>
+                  <p className="text-sm font-bold" style={{ color: 'var(--ink)' }}>
+                    완료 <span style={{ color: 'var(--ink)' }}>{doneCount}</span> / {reviewTotal}
+                    <span className="ml-2 font-normal text-xs" style={{ color: 'var(--ink)' }}>남은 카드 {reviewQueue.length}장</span>
                   </p>
                 </div>
                 <button onClick={() => setShowReview(false)} className="text-xl hover:opacity-70" style={{ color: '#aaa' }}>✕</button>
               </div>
 
               {/* 진행 바 */}
-              <div className="h-1.5 flex" style={{ background: '#e4c1f9' }}>
-                <div className="h-full transition-all duration-500" style={{ width: `${progress * 100}%`, background: '#d0f4de' }} />
+              <div className="h-1.5 flex" style={{ background: 'var(--purple)' }}>
+                <div className="h-full transition-all duration-500" style={{ width: `${progress * 100}%`, background: 'var(--purple)' }} />
               </div>
 
               {/* 카드 */}
@@ -1176,15 +1180,12 @@ function WordsContent() {
                   {word.type && TYPE_BADGES[word.type] && (
                     <span className="tag text-xs" style={{ background: TYPE_BADGES[word.type].bg, color: TYPE_BADGES[word.type].color }}>{TYPE_BADGES[word.type].label}</span>
                   )}
-                  {word.difficulty > 0 && (
-                    <span className="tag text-xs" style={{ background: DIFFICULTY_COLORS[word.difficulty], color: '#1a1a1a' }}>{DIFFICULTY_LABELS[word.difficulty]}</span>
-                  )}
                 </div>
 
                 <button
                   type="button"
                   onClick={() => speak(word.word)}
-                  className="text-4xl font-extrabold hover:text-[#a9def9] transition-colors font-handwrite" style={{ color: '#1a1a1a' }}
+                  className="text-4xl font-extrabold hover:text-[#e4c1f9] transition-colors font-handwrite" style={{ color: 'var(--ink)' }}
                 >
                   {word.word}
                 </button>
@@ -1192,13 +1193,13 @@ function WordsContent() {
                 {!revealed ? (
                   <button
                     onClick={() => setRevealed(true)}
-                    className="mt-4 px-8 py-3 font-semibold rounded-2xl transition-colors text-sm" style={{ background: '#fcf6bd', color: '#1a1a1a', border: '2px solid #a9def9' }}
+                    className="mt-4 px-8 py-3 font-semibold rounded-2xl transition-colors text-sm" style={{ background: 'var(--yellow)', color: 'var(--ink)', border: '2px solid #e4c1f9' }}
                   >
                     의미 보기 👀
                   </button>
                 ) : (
                   <div className="mt-2 space-y-2 w-full text-center animate-fade-in">
-                    <p className="text-2xl font-bold font-handwrite" style={{ color: '#1a1a1a' }}>{word.translation}</p>
+                    <p className="text-2xl font-bold font-handwrite" style={{ color: 'var(--ink)' }}>{word.translation}</p>
                     {word.exampleEn && (
                       <button
                         type="button"
@@ -1218,14 +1219,14 @@ function WordsContent() {
                   {[
                     { label: '다시', emoji: '😵', quality: 1, bg: '#ff99c8', hint: '큐 뒤로' },
                     { label: '어려움', emoji: '😅', quality: 2, bg: '#e4c1f9', hint: '큐 뒤로' },
-                    { label: '알겠음', emoji: '🙂', quality: 4, bg: '#a9def9', hint: '통과' },
-                    { label: '완벽!', emoji: '🎉', quality: 5, bg: '#d0f4de', hint: '통과' },
+                    { label: '알겠음', emoji: '🙂', quality: 4, bg: '#e4c1f9', hint: '통과' },
+                    { label: '완벽!', emoji: '🎉', quality: 5, bg: '#e4c1f9', hint: '통과' },
                   ].map(btn => (
                     <button
                       key={btn.quality}
                       onClick={() => handleReviewAnswer(btn.quality)}
                       className="flex flex-col items-center gap-1 py-3 rounded-2xl font-semibold text-xs transition-colors hover:opacity-80"
-                      style={{ background: btn.bg, color: '#1a1a1a', border: '1.5px solid rgba(0,0,0,0.08)' }}
+                      style={{ background: btn.bg, color: 'var(--ink)', border: '1.5px solid rgba(0,0,0,0.08)' }}
                     >
                       <span className="text-xl">{btn.emoji}</span>
                       {btn.label}

@@ -1,3 +1,4 @@
+export const runtime = 'edge'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUserFromRequest } from '@/lib/auth'
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
 
     let body: Record<string, unknown>
     try {
-      body = await req.json()
+      body = await req.json() as any
     } catch {
       return NextResponse.json({ error: '요청 형식이 올바르지 않아요' }, { status: 400 })
     }
@@ -162,17 +163,22 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    // 냥 획득 (+5냥)
+    // 냥 획득 (+5냥) + 출석일 카운트
     try {
-      const u = await prisma.user.findUnique({ where: { id: authUser.userId }, select: { nyang: true } })
+      const u = await prisma.user.findUnique({ where: { id: authUser.userId }, select: { nyang: true, streak: true, lastStudyDay: true } })
       if (u != null) {
-        await prisma.user.update({
-          where: { id: authUser.userId },
-          data: { nyang: (u.nyang ?? 0) + 5 },
-        })
+        const kstNow = new Date(Date.now() + 9 * 3600000)
+        const today = kstNow.toISOString().slice(0, 10)
+        const yesterday = new Date(Date.now() + 9 * 3600000 - 86400000).toISOString().slice(0, 10)
+        const alreadyCounted = u.lastStudyDay === today
+        const newStreak = alreadyCounted ? u.streak : (u.lastStudyDay === yesterday ? u.streak + 1 : 1)
+        const streakData = alreadyCounted
+          ? { nyang: (u.nyang ?? 0) + 5 }
+          : { nyang: (u.nyang ?? 0) + 5, streak: newStreak, lastStudyDay: today }
+        await prisma.user.update({ where: { id: authUser.userId }, data: streakData })
       }
     } catch (err) {
-      console.error('[POST /api/words] nyang update:', err)
+      console.error('[POST /api/words] nyang/streak update:', err)
     }
 
     // Update vocab level

@@ -1,3 +1,4 @@
+export const runtime = 'edge'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUserFromRequest } from '@/lib/auth'
@@ -9,7 +10,7 @@ export async function POST(req: NextRequest) {
   const authUser = await getAuthUserFromRequest(req)
   if (!authUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { type, topic } = await req.json() // type: "weekly_wrong" | "random" | "topic"
+  const { type, topic } = await req.json() as any // type: "weekly_wrong" | "random" | "topic"
 
   let words: Array<{ id: string; word: string; translation: string; exampleEn: string }>
 
@@ -77,7 +78,7 @@ export async function PATCH(req: NextRequest) {
   const authUser = await getAuthUserFromRequest(req)
   if (!authUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { sessionId, score, total } = await req.json()
+  const { sessionId, score, total } = await req.json() as any
 
   const session = await prisma.quizSession.findFirst({
     where: { id: sessionId, userId: authUser.userId },

@@ -1,3 +1,4 @@
+export const runtime = 'edge'
 import { NextRequest, NextResponse } from 'next/server'
 import { generateWordData } from '@/lib/ai'
 import OpenAI from 'openai'
@@ -5,7 +6,7 @@ import OpenAI from 'openai'
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
 export async function POST(req: NextRequest) {
-  const { word, field, count } = await req.json()
+  const { word, field, count } = await req.json() as any
   if (!word || !field) return NextResponse.json({ error: 'Missing params' }, { status: 400 })
 
   try {
